@@ -1,0 +1,73 @@
+/*Styles sheet for Katie Ho's Personal Website*/
+/* reset css */
+* 	{
+	padding: 0;
+	margin: 0;
+	font-size: 100%;
+	font-weight: normal;
+	}
+
+table { border-collapse: collapse; border-spacing: 0; }
+td, th, caption { font-weight: normal; text-align: left; }
+img, fieldset { border: 0; }
+ol { padding-left: 1.4em; list-style: decimal; }
+ul { padding-left: 1.4em; list-style:square; }
+q:before, q:after { content:''; }
+/* end reset */
+
+html 		{
+		background-color: #EEEEEE;
+		}
+
+body 	{
+		background-color: #FFFFFF;
+		width: 800px;
+		margin-top: 0px;
+		margin-left: 0px;
+		margin-right: 0px;
+		padding-left: 1.4em;
+		
+		color: #B18585;
+		font-family: "Palatino Linotype", Baskerville, serif;
+		padding: 80px;
+		margin: 0 auto;
+		}
+p.co 	{
+		color:rgb(0,0,0);
+		font-size: 0.8em;
+		font-family: "Courier New", Courier, monospace;
+		margin-top: 0px;
+		margin-bottom: 15px;
+		padding-left: 20px;
+		}
+#header h1 {
+		text-align: center;
+		}
+
+h1		{	/*The only way for <h1> to inherit stuff from the body is if it is below the body.*/
+		color: #5f3d3d;
+		font-size: 1.5em;
+		font-family: "Palatino Linotype", Baskerville, serif;
+		margin-top: 12px;
+		margin-bottom: 0px;	
+		}
+
+h2		{ /*notice that h2 is overriding body stuff in color*/
+		font-size: 1.25em;
+		color: #4F769C;
+		margin-top: 12px;
+		margin-bottom: 0px;	
+		}
+
+
+#footer {
+		padding: 10px;
+		border-top: 1px dotted #98AFBE;
+		border-bottom: 1px dotted #98AFBE;
+		margin-top: 12px;
+		}
+
+				
+#footer p 	{
+			text-align: center;
+			}

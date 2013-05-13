@@ -1,0 +1,116 @@
+<!DOCTYPE HTML>
+  
+<html>
+<head>
+	<title>Katie Ho's Activity A01 Workflow Project</title>
+
+	<link rel="stylesheet" type="text/css" href="styles.css">
+
+	<script type="text/javascript">
+
+	  var _gaq = _gaq || [];
+	  _gaq.push(['_setAccount', 'UA-39665745-1']);
+	  _gaq.push(['_trackPageview']);
+
+	  (function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	  })();
+
+	</script>
+</head>
+
+
+<body>
+<h1>Katie Ho's Activity A01 Workflow Project</h1>
+<hr>
+<br>
+
+<p>
+Dear Instructors, TAs, and Classmates:  <br>
+Here is the website for my Activity workflow project.  Please be nice. Do not make fun.<br>
+Sincerely, <br>
+Katie <br>
+</p>
+
+<h2>Link to report:</h2>
+	<p>
+		<ul>
+  		<a href="http://students.washington.edu/ktyunho/workflow/WorkflowProjectReport.pdf"/>WorkflowProjectReport.pdf</a>	
+		</ul>
+	</p>
+
+
+<h2>Link to terminal command shell:</h2>
+	<p>
+		<ul>
+  		<a href="http://students.washington.edu/ktyunho/workflow/terminal.php"/>Terminal.php</a>	
+		</ul>
+	</p>
+
+<h2>Instructions For Testing:</h2>
+	<p>In order to test the functions in the terminal, you can use the following commands and paste it into the terminal.  First, you can list the current workflows and create a new workflow "A2."  </p>
+		<p class ="co">
+		workflow list<br>
+		workflow create -n "A2" -i "workflow for assignment two"
+		</p>
+
+	<p>In order to add nodes to the new workflow, you can use the following commands.  </p>
+		<p class = "co">
+		node add -wf "A2" -sn "dad" -t "F" -n "the dad node"<br>
+		node add -wf "A2" -sn "bob" -t "A" -n "the bob node"<br>
+		node add -wf "A2" -sn "sis" -t "A" -n "the sis node"<br>
+		node add -wf "A2" -sn "mom" -t "J" -n "the mom node"
+		</p>
+	
+	<p>You can link between nodes using the following commands. </p>
+		<p class = "co">
+		link start -wf "A2" -to "dad"<br>
+		link -wf "A2" -from "dad" -to "bob" -g "bad parenting"<br>
+		link -wf "A2" -from "dad" -to "sis" -g "bad parenting"<br>
+		link -wf "A2" -from "bob" -to "mom" -g "favorite son"<br>
+		link -wf "A2" -from "sis" -to "mom" -g "female bonding"<br>
+		link finish -wf "A2" -from "mom" -g "the glue"
+		</p>
+
+	<p>You can find information about the workflow, nodes, and links through the following commands.  For example, the "link children" command shows the children nodes of the given node.  Then, you can delete the workflow that you just created with the workflow delete command.</p>
+		<p class = "co">
+		link children -wf "A2" -sn "dad"
+		<br>node loose -wf "A2"
+		<br>node list -wf "A2"
+		<br>workflow delete -n "A2"
+		</p>
+	</p>
+</p>
+
+
+<h2>Links to code:</h2>
+	<p>
+		<ul>
+		<li> <a href="source_viewer.php?fn=activitydb.sql">activitydb.sql</a>: The SQL for creating tables/functions and loading test data. 
+		<li> <a href="source_viewer.php?fn=cmd_workflow.php">cmd_workflow.php</a>: Functions for the workflow commands
+		<li> <a href="source_viewer.php?fn=DBVars.php">DBVars.php</a>: Database connection information
+		<li> <a href="source_viewer.php?fn=cmd_VARS.php">cmd_VARS.php</a>: Global variables and functions
+		<li> <a href="source_viewer.php?fn=db_util.php">db_util.php</a>: Utility functions for accessing the database
+		<li> <a href="source_viewer.php?fn=cmd_dispatch.php">cmd_dispatch.php</a>: Functions for parsing and dispatching commands
+		<li> <a href="source_viewer.php?fn=cmd_util.php">cmd_util.php</a>: Implementations of the UTILITY functions go here
+		<li> <a href="source_viewer.php?fn=source_viewer.php">source_viewer.php</a>: Code for presenting source files <p>
+		<li> <a href="source_viewer.php?fn=terminal.php">terminal.php</a>: Code for the terminal<p>
+
+		</ul>
+
+	</p>
+
+
+<br>
+<hr>
+<p>
+Contact: <b>ktyunho<img src="images/at.gif" alt='(at)'>uw.edu</b>
+</p>
+
+
+
+</body>
+
+</html>
