@@ -1,4 +1,6 @@
-﻿/*
+﻿/* This is Xing's Comment */
+
+/*
  * A database for diagramming workflow
  */
 
