@@ -1,5 +1,5 @@
 ﻿/*
- * A database for diagramming workflow
+ * A database for gossip guy
  */
 
 create or replace language plpgsql;
@@ -7,8 +7,15 @@ create or replace language plpgsql;
 DROP SCHEMA IF EXISTS ggdb CASCADE;
 CREATE SCHEMA ggdb; 
 
+
 /*
- * Represents workflow with only one unique name
+ ********************************************************************************
+    TABLES AND INDEXES:   
+ ********************************************************************************
+ */
+
+/*
+ * WORKFLOW:  Represents workflow with only one unique name
  */
 CREATE TABLE ggdb.workflow (
 	id 	SERIAL PRIMARY KEY,
@@ -17,7 +24,7 @@ CREATE TABLE ggdb.workflow (
 );
 
 /*
- * Represents different node types
+ * WORKFLOW:  Represents different node types
  */	
 CREATE DOMAIN ggdb.nodetype char(1)
    check (value in (
@@ -30,7 +37,7 @@ CREATE DOMAIN ggdb.nodetype char(1)
          );
 
 /*
- * Represents a node
+ * WORKFLOW:  Represents a node
  */
 CREATE TABLE ggdb.node (
 	id 		SERIAL PRIMARY KEY,
@@ -43,7 +50,7 @@ CREATE TABLE ggdb.node (
 );
 
 /*
- * Represents a link between nodes
+ * WORKFLOW:  Represents a link between nodes
  */
 CREATE TABLE ggdb.link (
 	fromnode_id	int references ggdb.node(id) on delete no action,
@@ -51,6 +58,108 @@ CREATE TABLE ggdb.link (
 	guardlabel	varchar(64),
 	PRIMARY KEY (fromnode_id, tonode_id)
 );
+
+/*
+ * DOCUMENT:  Represents gossip
+ */
+CREATE TABLE ggdb.gossip (
+	id		SERIAL PRIMARY KEY,
+	title		varchar(128),
+	body		text
+);
+
+
+/*
+ * WORKFLOW/DOCUMENT:  Represents state of each gossip, bridges gossip and node
+ */
+CREATE TABLE ggdb.gossip_node (
+	node_id		int references ggdb.node(id) on delete no action,
+	gossip_id	int references ggdb.gossip(id) on delete no action,
+	time		timestamp,
+	PRIMARY KEY (node_id, gossip_id)
+);
+
+/*
+ * DOCUMENT:  Represents reporter
+ */
+CREATE TABLE ggdb.reporter (
+	id		SERIAL PRIMARY KEY,
+	first_name	varchar(64),
+	last_name	varchar(64),
+	commission	money	
+);
+
+/*
+ * DOCUMENT:  Represents celebrity
+ */
+CREATE TABLE ggdb.celebrity (
+	id		SERIAL PRIMARY KEY,
+	first_name	varchar(64),
+	last_name	varchar(64),
+	nick_name	varchar(64),
+	birthdate	date	
+);
+
+/*
+ * DOCUMENT:  Represents link between reporter and gossip
+ */
+CREATE TABLE ggdb.reporter_gossip (
+	reporter_id	int references ggdb.reporter(id) on delete no action,
+	gossip_id	int references ggdb.gossip(id) on delete no action,
+	PRIMARY KEY (gossip_id, reporter_id)
+);
+
+/*
+ * DOCUMENT:  Represents link between celebrity and gossip
+ */
+CREATE TABLE ggdb.celebrity_gossip (
+	celebrity_id	int references ggdb.celebrity(id) on delete no action,
+	gossip_id	int references ggdb.gossip(id) on delete no action,
+	PRIMARY KEY (gossip_id, celebrity_id)
+);
+
+/*
+ * TAGGING:  Represents bundle of tags
+ */
+CREATE TABLE ggdb.bundle (
+	id	SERIAL PRIMARY KEY,
+	name	varchar(64)
+);
+
+/*
+ * TAGGING:  Represents tag
+ */
+CREATE TABLE ggdb.tag (
+	id		SERIAL PRIMARY KEY,
+	bundle_id	int references ggdb.bundle(id) on delete no action,
+	name		varchar(64)
+);
+
+/*
+ * DOCUMENT/TAGGING:  Represents link between gossip and tag
+ */
+CREATE TABLE ggdb.gossip_tag (
+	gossip_id	int references ggdb.gossip(id) on delete no action,
+	tag_id	int references ggdb.tag(id) on delete no action,
+	PRIMARY KEY (gossip_id, tag_id)
+);
+
+/*
+ * UTILITY:  stores information on major system events
+ */
+CREATE TABLE ggdb.revision_history (
+	id	SERIAL PRIMARY KEY,
+	time	timestamp,
+	message	text
+);
+
+
+/*
+ ********************************************************************************
+   FUNCTIONS:   
+ ********************************************************************************
+ */
+
 
 /*
  * Function links node to starting node for that workflow
@@ -70,14 +179,14 @@ BEGIN
 		RAISE EXCEPTION 'gossip guy app: workflow >%< not found', p_workflowname;
 	END IF;
 
-	IF p_nodeshortname NOT IN (select ggdb.node.shortname from ggdb.node where ggdb.node.workflow_id = workflowid) THEN
+	IF p_nodeshortname NOT IN (SELECT ggdb.node.shortname FROM ggdb.node WHERE ggdb.node.workflow_id = workflowid) THEN
 		RAISE EXCEPTION 'gossip guy app:  node shortname >%< not found', p_nodeshortname;
 	END IF;
 
 	insert into ggdb.link (fromnode_id, tonode_id, guardlabel) values
 		(
-		(select ggdb.node.id from ggdb.node where ggdb.node.workflow_id = workflowid and ggdb.node.nodetype = 'S')
-		, (select ggdb.node.id from ggdb.node where ggdb.node.workflow_id = workflowid and ggdb.node.shortname = p_nodeshortname)
+		(SELECT ggdb.node.id FROM ggdb.node WHERE ggdb.node.workflow_id = workflowid AND ggdb.node.nodetype = 'S')
+		, (SELECT ggdb.node.id FROM ggdb.node WHERE ggdb.node.workflow_id = workflowid AND ggdb.node.shortname = p_nodeshortname)
 		, p_guardlabel
 		);
 END;
@@ -397,7 +506,9 @@ $PROC$ LANGUAGE plpgsql;
 
 
 /*
- * Following creates a default workflow
+ ********************************************************************************
+    INSERT DEFAULT DATA:   
+ ********************************************************************************
  */
 select ggdb.create_workflow ('def', 'default');
 select ggdb.add_node ('def', 'zzz', 'default node for default workflow', 'A');
@@ -406,7 +517,7 @@ select ggdb.link_to_finish ('def', 'zzz', '');
 
 
 /*
- * Following were used to test functions.
+ * TESTING FUNCTIONS
  */
 /*
 select ggdb.get_workflows();
