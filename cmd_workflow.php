@@ -153,7 +153,7 @@ function wf_create($cmd_list) {
 		return cCmdStatus_ERROR; 
 	}
 
-	$sql = sprintf("SELECT activitydb.create_workflow ('%s', '%s')", $n, $i);
+	$sql = sprintf("SELECT ggdb.create_workflow ('%s', '%s')", $n, $i);
 
 	$result = runScalarDbQuery($sql);
 
@@ -174,7 +174,7 @@ function wf_delete($cmd_list) {
 	}
 
 
-	$sql = sprintf("SELECT activitydb.drop_workflow ('%s');", $n);
+	$sql = sprintf("SELECT ggdb.drop_workflow ('%s');", $n);
 
 	$result = runScalarDbQuery($sql, "basicPrintLine");
 
@@ -190,7 +190,7 @@ function wf_delete($cmd_list) {
 function wf_list($cmd_list) {
 	global $gResult;
 
-	$sql = "SELECT activitydb.get_workflows();";
+	$sql = "SELECT ggdb.get_workflows();";
 
 	$result = runSetDbQuery($sql,"basicPrintLine");
 
@@ -215,7 +215,7 @@ function node_add($cmd_list) {
 	}
 
 
-	$sql = sprintf("select activitydb.add_node ('%s', '%s', '%s', '%s');", $wf, $sn, $n, $t);
+	$sql = sprintf("select ggdb.add_node ('%s', '%s', '%s', '%s');", $wf, $sn, $n, $t);
 
 	$result = runScalarDbQuery($sql);
 
@@ -236,7 +236,7 @@ function node_list($cmd_list) {
 	}
 
 
-	$sql = sprintf("select activitydb.get_nodes ('%s');", $wf);
+	$sql = sprintf("select ggdb.get_nodes ('%s');", $wf);
 
 
 	$result = runSetDbQuery($sql,"basicPrintLine");
@@ -259,7 +259,7 @@ function node_loose($cmd_list) {
 	}
 
 
-	$sql = sprintf("select activitydb.find_loose_nodes ('%s');", $wf);
+	$sql = sprintf("select ggdb.find_loose_nodes ('%s');", $wf);
 
 
 	$result = runSetDbQuery($sql,"basicPrintLine");
@@ -284,7 +284,7 @@ function link_start($cmd_list) {
 	}
 
 
-	$sql = sprintf("select activitydb.link_from_start ('%s', '%s', '%s');", $wf, $to, $g);
+	$sql = sprintf("select ggdb.link_from_start ('%s', '%s', '%s');", $wf, $to, $g);
 
 	$result = runScalarDbQuery($sql);
 
@@ -307,7 +307,7 @@ function link_finish($cmd_list) {
 		return cCmdStatus_ERROR; 
 	}
 
-	$sql = sprintf("select activitydb.link_to_finish ('%s', '%s', '%s');", $wf, $from, $g);
+	$sql = sprintf("select ggdb.link_to_finish ('%s', '%s', '%s');", $wf, $from, $g);
 
 	$result = runScalarDbQuery($sql);
 
@@ -331,7 +331,7 @@ function link_between($cmd_list) {
 		return cCmdStatus_ERROR; 
 	}
 
-	$sql = sprintf("select activitydb.link_between ('%s', '%s', '%s', '%s');", $wf, $from, $to, $g);
+	$sql = sprintf("select ggdb.link_between ('%s', '%s', '%s', '%s');", $wf, $from, $to, $g);
 
 	$result = runScalarDbQuery($sql);
 
@@ -353,7 +353,7 @@ function link_children($cmd_list) {
 	}
 
 
-	$sql = sprintf("select activitydb.get_children ('%s', '%s');", $wf, $sn);
+	$sql = sprintf("select ggdb.get_children ('%s', '%s');", $wf, $sn);
 
 
 	$result = runSetDbQuery($sql,"basicPrintLine");
