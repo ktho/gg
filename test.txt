@@ -1,0 +1,15 @@
+﻿$ git config --global user.email you@somedomain.com
+$ git config --global user.name 'Your Name'
+
+$ mkdir project.git
+$ cd project.git
+$ git init
+$ git remote add -f -t master -m master origin git://example.com/git.git/
+$ git merge origin
+
+$ git add hello.rb 
+$ git status -s
+M  hello.rb
+$ git commit -m 'my hola mundo changes'
+[master 68aa034] my hola mundo changes
+ 1 files changed, 2 insertions(+), 1 deletions(-)
