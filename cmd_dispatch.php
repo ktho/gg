@@ -6,7 +6,10 @@
 include_once 'cmd_VARS.php';
 include 'db_util.php';
 include 'cmd_util.php';
-include 'cmd_workflow.php';
+include 'cmd_moduleworkflow.php';
+include 'cmd_moduledocument.php';
+include 'cmd_moduletagging.php';
+include 'cmd_moduleutility.php';
 
 /*
  * This function seeks to find a function that matches the command

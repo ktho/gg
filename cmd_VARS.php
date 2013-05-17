@@ -60,6 +60,27 @@ function getArgValue($arg, $cmd_list)
 }
 
 /*
+ * This function returns the parameter given the prompt such as -wf or -nm
+ */
+function getValue($prop_name, $cmd_list)
+{
+	$prop_value = NULL;
+
+	for ($k=0; $k < count($cmd_list); $k++) 
+	{
+		if ($cmd_list[$k] == $prop_name) {
+			if ($k+1 < count($cmd_list)) {
+				$prop_value = $cmd_list[$k+1];		
+			}
+
+		}
+	}
+	return $prop_value;
+}
+
+
+
+/*
  *  Returns TRUE if the arg is found list list of commands 
  */
 function argExists($arg, $cmd_list) 

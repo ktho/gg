@@ -156,13 +156,13 @@ CREATE TABLE ggdb.revision_history (
 
 /*
  ********************************************************************************
-   FUNCTIONS:   
+   WORKFLOW MODULE FUNCTIONS:   
  ********************************************************************************
  */
 
 
 /*
- * Function links node to starting node for that workflow
+ * WORKFLOW:  Function links node to starting node for that workflow
  */
 CREATE OR REPLACE FUNCTION ggdb.link_from_start (
 		p_workflowname varchar(64)
@@ -193,7 +193,7 @@ END;
 $PROC$ LANGUAGE plpgsql;
 
 /*
- * Function links node to ending node for that workflow
+ * WORKFLOW:  Function links node to ending node for that workflow
  */
 CREATE OR REPLACE FUNCTION ggdb.link_to_finish (
 		p_workflowname varchar(64)
@@ -224,7 +224,7 @@ END;
 $PROC$ LANGUAGE plpgsql;
 
 /*
- * Function links node to other nodes
+ * WORKFLOW:  Function links node to other nodes
  */
 CREATE OR REPLACE FUNCTION ggdb.link_between (
 		p_workflowname varchar(64)
@@ -261,7 +261,7 @@ END;
 $PROC$ LANGUAGE plpgsql;
 
 /*
- * Function adds nodes to a workflow
+ * WORKFLOW:  Function adds nodes to a workflow
  */
 CREATE OR REPLACE FUNCTION ggdb.add_node (
 		p_workflowname varchar(64) 
@@ -294,7 +294,7 @@ END;
 $PROC$ LANGUAGE plpgsql;
 
 /*
- * Function returns node information for a workflow
+ * WORKFLOW:  Function returns node information for a workflow
  */
 CREATE OR REPLACE FUNCTION ggdb.get_nodes (
 		p_workflowname varchar(64) 
@@ -320,7 +320,7 @@ END;
 $PROC$ LANGUAGE plpgsql;
 
 /*
- * Function returns node information when given id of the node
+ * WORKFLOW:  Function returns node information when given id of the node
  */
 CREATE OR REPLACE FUNCTION ggdb.get_node_by_id (
 		p_nodeid INTEGER
@@ -345,7 +345,7 @@ END;
 $PROC$ LANGUAGE plpgsql;
 
 /*
- * Function returns node information for nodes without links.
+ * WORKFLOW:  Function returns node information for nodes without links.
  */
 CREATE OR REPLACE FUNCTION ggdb.find_loose_nodes (
 		p_workflowname varchar(64) 
@@ -380,7 +380,7 @@ $PROC$ LANGUAGE plpgsql;
 
 
 /*
- * Function creates a workflow.
+ * WORKFLOW:  Function creates a workflow.
  */
 CREATE OR REPLACE FUNCTION ggdb.create_workflow (
 		p_name varchar(64) 
@@ -403,7 +403,7 @@ END;
 $PROC$ LANGUAGE plpgsql;
 
 /*
- * Function deletes workflow and all of its associated nodes and links.
+ * WORKFLOW:  Function deletes workflow and all of its associated nodes and links.
  */
 CREATE OR REPLACE FUNCTION ggdb.drop_workflow (
 		p_workflowname varchar(64) 
@@ -433,7 +433,7 @@ END;
 $PROC$ LANGUAGE plpgsql;
 
 /*
- * Function returns all workflow information in database.
+ * WORKFLOW:  Function returns all workflow information in database.
  */
 CREATE OR REPLACE FUNCTION ggdb.get_workflows (
 )
@@ -450,7 +450,7 @@ END;
 $PROC$ LANGUAGE plpgsql;
 
 /*
- * Table created for the function ggdb.get_children, to return table in following format.
+ * WORKFLOW:  Table created for the function ggdb.get_children, to return table in following format.
  */
 CREATE TABLE ggdb.children (
 		guardlabel	varchar(64),
@@ -460,7 +460,7 @@ CREATE TABLE ggdb.children (
 );
 
 /*
- * Function returns information on children of given node.
+ * WORKFLOW:  Function returns information on children of given node.
  */
 CREATE OR REPLACE FUNCTION ggdb.get_children (
 	p_workflowname		varchar(64),
@@ -502,6 +502,39 @@ BEGIN
 
 END;
 $PROC$ LANGUAGE plpgsql;
+
+
+/*
+ ********************************************************************************
+    DOCUMENT MODULE FUNCTIONS:   
+ ********************************************************************************
+ */
+
+
+/*
+ * DOCUMENT:  Function returns information on children of given node.
+ */
+/*
+CREATE OR REPLACE FUNCTION ggdb.add_reporter (
+*/
+
+
+
+
+/*
+ ********************************************************************************
+   TAGGING MODULE FUNCTIONS:   
+ ********************************************************************************
+ */
+
+
+
+/*
+ ********************************************************************************
+   UTILITY MODULE FUNCTIONS:   
+ ********************************************************************************
+ */
+
 
 
 
