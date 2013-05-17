@@ -84,6 +84,7 @@ CREATE TABLE ggdb.gossip_node (
  */
 CREATE TABLE ggdb.reporter (
 	id		SERIAL PRIMARY KEY,
+	username	varchar(64),
 	first_name	varchar(64),
 	last_name	varchar(64),
 	commission	money	
@@ -512,12 +513,65 @@ $PROC$ LANGUAGE plpgsql;
 
 
 /*
- * DOCUMENT:  Function returns information on children of given node.
+ * DOCUMENT:  Add Reporter
  */
+--CREATE OR REPLACE FUNCTION ggdb.add_reporter (
+
+
 /*
-CREATE OR REPLACE FUNCTION ggdb.add_reporter (
+ * DOCUMENT:  Create Gossip
+ */
+ /*
+CREATE OR REPLACE FUNCTION ggdb.create_gossip
+		p_title varchar(64) 
+		, p_body text
+)
+RETURNS void AS $PROC$
+DECLARE
+	workflowid INTEGER;
+BEGIN
+	select ggdb.workflow.id into workflowid from ggdb.workflow where ggdb.workflow.name = p_workflowname;
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'gossip guy app:  workflow >%< not found', p_workflowname;
+	END IF;
+
+	IF p_shortname IN (select ggdb.node.shortname from ggdb.node where ggdb.node.workflow_id = workflowid) THEN
+		RAISE EXCEPTION 'gossip guy app:  node shortname >%< already exists', p_shortname;
+	END IF;
+
+	INSERT INTO ggdb.node (workflow_id, shortname, name, nodetype) VALUES
+		(
+		workflowid
+		, p_shortname
+		, p_name
+		, p_nodetype
+		);
+
+END;
+$PROC$ LANGUAGE plpgsql;
 */
 
+
+
+/*
+ * DOCUMENT:  Update Gossip
+ */
+--CREATE OR REPLACE FUNCTION ggdb.
+
+/*
+ * DOCUMENT:  Delete Gossip
+ */
+--CREATE OR REPLACE FUNCTION ggdb.
+
+/*
+ * DOCUMENT:  Get Gossip From Reporter
+ */
+--CREATE OR REPLACE FUNCTION ggdb.
+
+/*
+ * DOCUMENT:  Get Gossip About
+ */
+--CREATE OR REPLACE FUNCTION ggdb.
 
 
 
