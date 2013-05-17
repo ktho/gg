@@ -42,8 +42,8 @@ CREATE DOMAIN ggdb.nodetype char(1)
 CREATE TABLE ggdb.node (
 	id 		SERIAL PRIMARY KEY,
 	workflow_id 	int references ggdb.workflow(id) on delete no action,
-	shortname	varchar(3) check (shortname ~ '^[abcdefghijklmnopqrstuvwxyz]+$') NOT NULL,  
-			--3 character maximum, lowercase only, no spaces, not unique
+	shortname	varchar(3) check (shortname ~* '^[abcdefghijklmnopqrstuvwxyz]+$') NOT NULL,  
+			--3 character maximum, no spaces, not unique
 	name		varchar(64) check (name ~* '^[abcdefghijklmnopqrstuvwxyz ]+$') NOT NULL,  
 			--lowercase or uppercase, space allowed, same name in multiple workflows allowed
 	nodetype	ggdb.nodetype
@@ -64,8 +64,8 @@ CREATE TABLE ggdb.link (
  */
 CREATE TABLE ggdb.gossip (
 	id		SERIAL PRIMARY KEY,
-	title		varchar(128),
-	body		text
+	title		varchar(128) NOT NULL,
+	body		text NOT NULL
 );
 
 
@@ -75,7 +75,7 @@ CREATE TABLE ggdb.gossip (
 CREATE TABLE ggdb.gossip_node (
 	node_id		int references ggdb.node(id) on delete no action,
 	gossip_id	int references ggdb.gossip(id) on delete no action,
-	time		timestamp,
+	time		timestamp NOT NULL,
 	PRIMARY KEY (node_id, gossip_id)
 );
 
@@ -84,9 +84,9 @@ CREATE TABLE ggdb.gossip_node (
  */
 CREATE TABLE ggdb.reporter (
 	id		SERIAL PRIMARY KEY,
-	username	varchar(64),
-	first_name	varchar(64),
-	last_name	varchar(64),
+	username	varchar(64) check (username ~* '^[abcdefghijklmnopqrstuvwxyz ]+$') UNIQUE NOT NULL,
+	first_name	varchar(64) check (first_name ~* '^[abcdefghijklmnopqrstuvwxyz-. ]+$') NOT NULL,
+	last_name	varchar(64) check (last_name ~* '^[abcdefghijklmnopqrstuvwxyz-. ]+$') NOT NULL,
 	commission	money	
 );
 
@@ -95,9 +95,9 @@ CREATE TABLE ggdb.reporter (
  */
 CREATE TABLE ggdb.celebrity (
 	id		SERIAL PRIMARY KEY,
-	first_name	varchar(64),
-	last_name	varchar(64),
-	nick_name	varchar(64),
+	nick_name	varchar(64) check (nick_name ~* '^[abcdefghijklmnopqrstuvwxyz-. ]+$') UNIQUE NOT NULL,	
+	first_name	varchar(64) check (first_name ~* '^[abcdefghijklmnopqrstuvwxyz ]+$') NOT NULL,
+	last_name	varchar(64) check (last_name ~* '^[abcdefghijklmnopqrstuvwxyz-. ]+$') NOT NULL,
 	birthdate	date	
 );
 
@@ -124,7 +124,7 @@ CREATE TABLE ggdb.celebrity_gossip (
  */
 CREATE TABLE ggdb.bundle (
 	id	SERIAL PRIMARY KEY,
-	name	varchar(64)
+	name	varchar(64) check (name ~* '^[abcdefghijklmnopqrstuvwxyz-. ]+$') UNIQUE NOT NULL
 );
 
 /*
@@ -133,7 +133,7 @@ CREATE TABLE ggdb.bundle (
 CREATE TABLE ggdb.tag (
 	id		SERIAL PRIMARY KEY,
 	bundle_id	int references ggdb.bundle(id) on delete no action,
-	name		varchar(64)
+	name		varchar(64) check (name ~* '^[abcdefghijklmnopqrstuvwxyz-. ]+$') UNIQUE NOT NULL
 );
 
 /*
@@ -141,7 +141,7 @@ CREATE TABLE ggdb.tag (
  */
 CREATE TABLE ggdb.gossip_tag (
 	gossip_id	int references ggdb.gossip(id) on delete no action,
-	tag_id	int references ggdb.tag(id) on delete no action,
+	tag_id		int references ggdb.tag(id) on delete no action,
 	PRIMARY KEY (gossip_id, tag_id)
 );
 
@@ -150,8 +150,8 @@ CREATE TABLE ggdb.gossip_tag (
  */
 CREATE TABLE ggdb.revision_history (
 	id	SERIAL PRIMARY KEY,
-	time	timestamp,
-	message	text
+	time	timestamp NOT NULL,
+	message	text NOT NULL
 );
 
 
