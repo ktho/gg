@@ -531,6 +531,9 @@ BEGIN
 	INSERT INTO ggdb.reporter (username, first_name, last_name, commission) VALUES
 		(p_username, p_first, p_last, p_comm);
 END;
+
+/* Call Revision History Funciton Here
+ */
 $PROC$ LANGUAGE plpgsql;
 );
 
@@ -539,7 +542,9 @@ $PROC$ LANGUAGE plpgsql;
  * @Author: Xing
  */
 CREATE OR REPLACE FUNCTION ggdb.update_reporter (
-		p_username varchar(64) 
+		p_username varchar(64)
+		, p_first varchar(64)
+		, p_last varchar(64)
 		, p_comm money
 )
 RETURNS void AS $PROC$
@@ -549,33 +554,35 @@ BEGIN
 		RAISE EXCEPTION 'gossip guy app:  reporter username >%< already exists', p_username;
 	END IF;
 
-	Update ggdb.reporter (username, commission) VALUES
-		(p_username, p_comm);
+	Update ggdb.reporter (username, first_name, last_name, commission) VALUES
+		(p_username, p_first, p_last, p_comm);
 END;
 $PROC$ LANGUAGE plpgsql;
+
+/* Call Revision History Funciton Here
+ */
 );
 
-
+/* DOCUMENT: Create Nick_Name for table celebrity if 
 /*
  * DOCUMENT:  Add Celebrity
  * @Author: Xing
  */
 CREATE OR REPLACE FUNCTION ggdb.add_celebrity (
-		p_id varchar(64) 
 		, p_first varchar(64)
 		, p_last varchar(64)
-		,p_nick varchar(64)
+		, p_nick varchar(64)
 		, p_bday date
 )
 RETURNS void AS $PROC$
 BEGIN
 
-	IF p_username IN (select R.username from ggdb.reporter R where R.username = p_username) THEN
-		RAISE EXCEPTION 'gossip guy app:  reporter username >%< already exists', p_username;
+	IF p_nick IN (select C.nick_name from ggdb.celebrity C where c.nick_name = p_nick) THEN
+		RAISE EXCEPTION 'gossip guy app:  celebrity >%< already exists', p_first || ' ' ||p_last;
 	END IF;
 
-	INSERT INTO ggdb.reporter (username, first_name, last_name, commission) VALUES
-		(p_username, p_first, p_last, p_comm);
+	INSERT INTO ggdb.celebrity (first_name, last_name, nick_name, birthdate) VALUES
+		(p_first, p_last, p_nick, p_bday);
 END;
 $PROC$ LANGUAGE plpgsql;
 );
@@ -679,8 +686,82 @@ $PROC$ LANGUAGE plpgsql;
  ********************************************************************************
  */
 
+/*
+ * TAGGING:  Create Tag
+ * @Author: cte13
+ */
+CREATE OR REPLACE FUNCTION ggdb.create_tag (
+		p_id 			int,
+		p_bundle_id		int,
+		p_name			varchar(64)
+)
+RETURNS void AS $PROC$
+BEGIN
+
+	IF p_id IN (select R.id from ggdb.tag R) THEN
+		RAISE EXCEPTION 'gossip guy app:  tag >%< already exists', p_name;
+	END IF;
+
+	INSERT INTO ggdb.tag (id, bundle_id, name) VALUES
+		(p_id, p_bundle_id, p_name);
+END;
+$PROC$ LANGUAGE plpgsql;
+);
 
 
+/*
+ * TAGGING:  Update Tag
+ * @Author: cte13
+ */
+CREATE OR REPLACE FUNCTION ggdb.update_tag (
+		p_id 			int,
+		p_bundle_id		int,
+		p_name			varchar(64)
+)
+RETURNS void AS $PROC$
+BEGIN
+
+	IF p_id NOT IN (select R.id from ggdb.tag R) THEN
+		RAISE EXCEPTION 'gossip guy app:  tag >%< does not exist', p_name;
+	END IF;
+
+	UPDATE ggdb.tag (id, bundle_id, name) VALUES
+		(p_id, p_bundle_id, p_name);
+END;
+$PROC$ LANGUAGE plpgsql;
+);
+ 
+ 
+ /*
+ * TAGGING:  Delete Tag
+ * @Author: cte13
+ */
+ 
+/*
+ * TAGGING:  Create Bundle
+ * @Author: cte13
+ */
+ 
+ /*
+ * TAGGING:  Update Bundle
+ * @Author: cte13
+ */
+ 
+ /*
+ * TAGGING:  Delete Bundle
+ * @Author: cte13
+ */
+ 
+ /*
+ * TAGGING:  View Gossip by Tag
+ * @Author: cte13
+ */
+ 
+/*
+ * TAGGING:  View Gossip by Bundle
+ * @Author: cte13
+ */
+ 
 /*
  ********************************************************************************
    UTILITY MODULE FUNCTIONS:   
