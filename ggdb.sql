@@ -531,6 +531,9 @@ BEGIN
 	INSERT INTO ggdb.reporter (username, first_name, last_name, commission) VALUES
 		(p_username, p_first, p_last, p_comm);
 END;
+
+/* Call Revision History Funciton Here
+ */
 $PROC$ LANGUAGE plpgsql;
 );
 
@@ -539,7 +542,9 @@ $PROC$ LANGUAGE plpgsql;
  * @Author: Xing
  */
 CREATE OR REPLACE FUNCTION ggdb.update_reporter (
-		p_username varchar(64) 
+		p_username varchar(64)
+		, p_first varchar(64)
+		, p_last varchar(64)
 		, p_comm money
 )
 RETURNS void AS $PROC$
@@ -549,33 +554,35 @@ BEGIN
 		RAISE EXCEPTION 'gossip guy app:  reporter username >%< already exists', p_username;
 	END IF;
 
-	Update ggdb.reporter (username, commission) VALUES
-		(p_username, p_comm);
+	Update ggdb.reporter (username, first_name, last_name, commission) VALUES
+		(p_username, p_first, p_last, p_comm);
 END;
 $PROC$ LANGUAGE plpgsql;
+
+/* Call Revision History Funciton Here
+ */
 );
 
-
+/* DOCUMENT: Create Nick_Name for table celebrity if 
 /*
  * DOCUMENT:  Add Celebrity
  * @Author: Xing
  */
 CREATE OR REPLACE FUNCTION ggdb.add_celebrity (
-		p_id varchar(64) 
 		, p_first varchar(64)
 		, p_last varchar(64)
-		,p_nick varchar(64)
+		, p_nick varchar(64)
 		, p_bday date
 )
 RETURNS void AS $PROC$
 BEGIN
 
-	IF p_username IN (select R.username from ggdb.reporter R where R.username = p_username) THEN
-		RAISE EXCEPTION 'gossip guy app:  reporter username >%< already exists', p_username;
+	IF p_nick IN (select C.nick_name from ggdb.celebrity C where c.nick_name = p_nick) THEN
+		RAISE EXCEPTION 'gossip guy app:  celebrity >%< already exists', p_first || ' ' ||p_last;
 	END IF;
 
-	INSERT INTO ggdb.reporter (username, first_name, last_name, commission) VALUES
-		(p_username, p_first, p_last, p_comm);
+	INSERT INTO ggdb.celebrity (first_name, last_name, nick_name, birthdate) VALUES
+		(p_first, p_last, p_nick, p_bday);
 END;
 $PROC$ LANGUAGE plpgsql;
 );
