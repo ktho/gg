@@ -642,8 +642,82 @@ $PROC$ LANGUAGE plpgsql;
  ********************************************************************************
  */
 
+/*
+ * TAGGING:  Create Tag
+ * @Author: cte13
+ */
+CREATE OR REPLACE FUNCTION ggdb.create_tag (
+		p_id 			int,
+		p_bundle_id		int,
+		p_name			varchar(64)
+)
+RETURNS void AS $PROC$
+BEGIN
+
+	IF p_id IN (select R.id from ggdb.tag R) THEN
+		RAISE EXCEPTION 'gossip guy app:  tag >%< already exists', p_name;
+	END IF;
+
+	INSERT INTO ggdb.tag (id, bundle_id, name) VALUES
+		(p_id, p_bundle_id, p_name);
+END;
+$PROC$ LANGUAGE plpgsql;
+);
 
 
+/*
+ * TAGGING:  Update Tag
+ * @Author: cte13
+ */
+CREATE OR REPLACE FUNCTION ggdb.update_tag (
+		p_id 			int,
+		p_bundle_id		int,
+		p_name			varchar(64)
+)
+RETURNS void AS $PROC$
+BEGIN
+
+	IF p_id NOT IN (select R.id from ggdb.tag R) THEN
+		RAISE EXCEPTION 'gossip guy app:  tag >%< does not exist', p_name;
+	END IF;
+
+	UPDATE ggdb.tag (id, bundle_id, name) VALUES
+		(p_id, p_bundle_id, p_name);
+END;
+$PROC$ LANGUAGE plpgsql;
+);
+ 
+ 
+ /*
+ * TAGGING:  Delete Tag
+ * @Author: cte13
+ */
+ 
+/*
+ * TAGGING:  Create Bundle
+ * @Author: cte13
+ */
+ 
+ /*
+ * TAGGING:  Update Bundle
+ * @Author: cte13
+ */
+ 
+ /*
+ * TAGGING:  Delete Bundle
+ * @Author: cte13
+ */
+ 
+ /*
+ * TAGGING:  View Gossip by Tag
+ * @Author: cte13
+ */
+ 
+/*
+ * TAGGING:  View Gossip by Bundle
+ * @Author: cte13
+ */
+ 
 /*
  ********************************************************************************
    UTILITY MODULE FUNCTIONS:   
