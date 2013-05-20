@@ -551,14 +551,9 @@ BEGIN
 	IF p_username NOT IN (select R.username from ggdb.reporter R where R.username = p_username) THEN
 		RAISE EXCEPTION 'gossip guy app:  reporter username >%< does not exist', p_username;
 	END IF;
-/*
-	Update ggdb.reporter SET
-		username
-		;
-
-	(username, first_name, last_name, commission) 
-		(p_username, p_first, p_last, p_comm);
-		*/
+	
+	Update ggdb.reporter SET ggdb.reporter.first_name=p_first, ggdb.reporter.last_name=p_last, ggdb.reporter.commission=p_comm VALUES
+	WHERE ggdb.reporter.username=p_username;
 END;
 $PROC$ LANGUAGE plpgsql;
 
