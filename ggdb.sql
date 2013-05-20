@@ -500,7 +500,6 @@ BEGIN
 			RETURN NEXT childrow;
 		END LOOP;
 	RETURN;
-
 END;
 $PROC$ LANGUAGE plpgsql;
 
@@ -532,10 +531,9 @@ BEGIN
 		(p_username, p_first, p_last, p_comm);
 END;
 
-/* Call Revision History Funciton Here
+/* Call Revision History Function Here
  */
 $PROC$ LANGUAGE plpgsql;
-);
 
 /*
  * DOCUMENT:  Update Reporter
@@ -550,26 +548,29 @@ CREATE OR REPLACE FUNCTION ggdb.update_reporter (
 RETURNS void AS $PROC$
 BEGIN
 
-	IF p_username IN (select R.username from ggdb.reporter R where R.username = p_username) THEN
-		RAISE EXCEPTION 'gossip guy app:  reporter username >%< already exists', p_username;
+	IF p_username NOT IN (select R.username from ggdb.reporter R where R.username = p_username) THEN
+		RAISE EXCEPTION 'gossip guy app:  reporter username >%< does not exist', p_username;
 	END IF;
+/*
+	Update ggdb.reporter SET
+		username
+		;
 
-	Update ggdb.reporter (username, first_name, last_name, commission) VALUES
+	(username, first_name, last_name, commission) 
 		(p_username, p_first, p_last, p_comm);
+		*/
 END;
 $PROC$ LANGUAGE plpgsql;
 
 /* Call Revision History Funciton Here
  */
-);
 
 /* DOCUMENT: Create Nick_Name for table celebrity if 
-/*
  * DOCUMENT:  Add Celebrity
  * @Author: Xing
  */
 CREATE OR REPLACE FUNCTION ggdb.add_celebrity (
-		, p_first varchar(64)
+		p_first varchar(64)
 		, p_last varchar(64)
 		, p_nick varchar(64)
 		, p_bday date
@@ -585,40 +586,75 @@ BEGIN
 		(p_first, p_last, p_nick, p_bday);
 END;
 $PROC$ LANGUAGE plpgsql;
-);
+
 /*
  * DOCUMENT:  Create Gossip
+ * @Author: Katie
  */
- /*
-CREATE OR REPLACE FUNCTION ggdb.create_gossip
-		p_title varchar(64) 
+ 
+CREATE OR REPLACE FUNCTION ggdb.create_gossip (
+		p_workflow
+		, p_nodeshortname
+		, p_reporter
+		, p_celebrity
+		, p_title varchar(128) 
 		, p_body text
 )
 RETURNS void AS $PROC$
 DECLARE
 	workflowid INTEGER;
+	nodeid INTEGER;
+	reporterid INTEGER;
+	celebrityid INTEGER;
+	gossipid INTEGER;
+	
 BEGIN
-	select ggdb.workflow.id into workflowid from ggdb.workflow where ggdb.workflow.name = p_workflowname;
+	select ggdb.workflow.id into workflowid from ggdb.workflow where ggdb.workflow.name = p_workflow;
 	IF NOT FOUND THEN
-		RAISE EXCEPTION 'gossip guy app:  workflow >%< not found', p_workflowname;
+		RAISE EXCEPTION 'gossip guy app:  workflow >%< not found', p_workflow;
 	END IF;
 
-	IF p_shortname IN (select ggdb.node.shortname from ggdb.node where ggdb.node.workflow_id = workflowid) THEN
-		RAISE EXCEPTION 'gossip guy app:  node shortname >%< already exists', p_shortname;
+	SELECT ggdb.node.id INTO nodeid FROM ggdb.node WHERE ggdb.workflow_id = workflowid and ggdb.node.shortname = p_nodeshortname;
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'gossip guy app:  node >%< not found', p_nodeshortname;
 	END IF;
 
-	INSERT INTO ggdb.node (workflow_id, shortname, name, nodetype) VALUES
+	select ggdb.reporter.id into reporterid from ggdb.reporter where ggdb.reporter.username = p_reporter;
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'gossip guy app:  reporter >%< not found', p_workflow;
+	END IF;
+
+	select ggdb.celebrity.id into celebrityid from ggdb.celebrity where ggdb.celeberity.nick_name = p_celebrity;
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'gossip guy app:  celebrity >%< not found', p_workflow;
+	END IF;
+
+	INSERT INTO ggdb.gossip (title, body) VALUES
 		(
-		workflowid
-		, p_shortname
-		, p_name
-		, p_nodetype
+		p_title
+		, p_body
 		);
 
+	INSERT INTO ggdb.gossip_node(node_id, gossip_id, time) VALUES
+		(
+		nodeid
+		, gossipid
+		, clock_timestamop()
+		);
+
+	INSERT INTO ggdb.reporter_gossip(reporter_id, gossip_id) VALUES
+		(
+		reporterid
+		, gossipid
+		);
+
+	INSERT INTO ggdb.celebrity_gossip(gossip_id, celebrity_id) VALUES
+		(
+		gossipid
+		, celebrityid
+		);
 END;
 $PROC$ LANGUAGE plpgsql;
-*/
-
 
 
 /*
@@ -669,7 +705,6 @@ BEGIN
 		(p_id, p_bundle_id, p_name);
 END;
 $PROC$ LANGUAGE plpgsql;
-);
 
 
 /*
@@ -692,7 +727,6 @@ BEGIN
 		(p_id, p_bundle_id, p_name);
 END;
 $PROC$ LANGUAGE plpgsql;
-);
  
  
  /*
@@ -757,10 +791,15 @@ $PROC$ LANGUAGE plpgsql;
  ********************************************************************************
  */
 select ggdb.create_workflow ('def', 'default');
-select ggdb.add_node ('def', 'zzz', 'default node for default workflow', 'A');
+select ggdb.add_node ('def', 'dra', 'draft', 'A');
+select ggdb.add_node ('def', 'pub', 'publish', 'A');
 select ggdb.link_from_start ('def', 'zzz', '');
 select ggdb.link_to_finish ('def', 'zzz', '');
-
+select ggdb.link_between('def', 'dra', 'pub');
+/*
+select ggdb.add_reporter('katie', 'Katie', 'Ho', '$10000.00');
+select ggdb.add_celebrity('Kirsten', 'Stewart', 'kstew', '2012-03-30');
+*/
 
 /*
  * TESTING FUNCTIONS
