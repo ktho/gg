@@ -96,8 +96,8 @@ CREATE TABLE ggdb.reporter (
 CREATE TABLE ggdb.celebrity (
 	id		SERIAL PRIMARY KEY,
 	nick_name	varchar(64) check (nick_name ~* '^[abcdefghijklmnopqrstuvwxyz .]+$') UNIQUE NOT NULL,	
-	first_name	varchar(64) check (first_name ~* '^[abcdefghijklmnopqrstuvwxyz .]+$') NOT NULL,
-	last_name	varchar(64) check (last_name ~* '^[abcdefghijklmnopqrstuvwxyz .]+$') NOT NULL,
+	first_name	varchar(32) check (first_name ~* '^[abcdefghijklmnopqrstuvwxyz .]+$') NOT NULL,
+	last_name	varchar(32) check (last_name ~* '^[abcdefghijklmnopqrstuvwxyz .]+$') NOT NULL,
 	birthdate	date	
 );
 
@@ -586,12 +586,12 @@ $PROC$ LANGUAGE plpgsql;
  * DOCUMENT:  Create Gossip
  * @Author: Katie
  */
- /*
+ 
 CREATE OR REPLACE FUNCTION ggdb.create_gossip (
-		p_workflow
-		, p_nodeshortname
-		, p_reporter
-		, p_celebrity
+		p_workflow varchar(64)
+		, p_nodeshortname varchar(3)
+		, p_reporter varchar(64)
+		, p_celebrity varchar(64)
 		, p_title varchar(128) 
 		, p_body text
 )
@@ -609,7 +609,7 @@ BEGIN
 		RAISE EXCEPTION 'gossip guy app:  workflow >%< not found', p_workflow;
 	END IF;
 
-	SELECT ggdb.node.id INTO nodeid FROM ggdb.node WHERE ggdb.workflow_id = workflowid and ggdb.node.shortname = p_nodeshortname;
+	SELECT ggdb.node.id INTO nodeid FROM ggdb.node WHERE ggdb.node.workflow_id = workflowid and ggdb.node.shortname = p_nodeshortname;
 	IF NOT FOUND THEN
 		RAISE EXCEPTION 'gossip guy app:  node >%< not found', p_nodeshortname;
 	END IF;
@@ -619,7 +619,7 @@ BEGIN
 		RAISE EXCEPTION 'gossip guy app:  reporter >%< not found', p_reporter;
 	END IF;
 
-	select ggdb.celebrity.id into celebrityid from ggdb.celebrity where ggdb.celeberity.nick_name = p_celebrity;
+	select ggdb.celebrity.id into celebrityid from ggdb.celebrity where ggdb.celebrity.nick_name = p_celebrity;
 	IF NOT FOUND THEN
 		RAISE EXCEPTION 'gossip guy app:  celebrity >%< not found', p_celebrity;
 	END IF;
@@ -629,6 +629,8 @@ BEGIN
 		p_title
 		, p_body
 		);
+
+	SELECT ggdb.gossip.id INTO gossipid FROM ggdb.gossip WHERE ggdb.gossip.title = p_title AND ggdb.gossip.body = p_body;
 
 	INSERT INTO ggdb.gossip_node(node_id, gossip_id, time) VALUES
 		(
@@ -650,7 +652,6 @@ BEGIN
 		);
 END;
 $PROC$ LANGUAGE plpgsql;
-*/
 
 
 /*
@@ -730,6 +731,7 @@ $PROC$ LANGUAGE plpgsql;
  * TAGGING:  Delete Tag
  * @Author: cte13
  */
+ /*
  CREATE OR REPLACE FUNCTION ggdb.delete_tag (
 		p_id 			int,
 		p_bundle_id		int,
@@ -746,6 +748,8 @@ BEGIN
 		(p_id, p_bundle_id, p_name);
 END;
 $PROC$ LANGUAGE plpgsql;
+ */
+
  
 /*
  * TAGGING:  Create Bundle
@@ -792,15 +796,20 @@ select ggdb.add_node ('def', 'pub', 'publish', 'A');
 select ggdb.link_from_start ('def', 'dra', '');
 select ggdb.link_to_finish ('def', 'pub', '');
 select ggdb.link_between('def', 'dra', 'pub', '');
-/*
 select ggdb.add_reporter('katie', 'Katie', 'Ho', '$10000.00');
 select ggdb.add_celebrity('Kirsten', 'Stewart', 'kstew', '2012-03-30');
-*/
+select ggdb.create_gossip('def', 'dra', 'katie', 'kstew', 'Kstew is in another scandal!', 'kstew tweets about whether she should get plastic surgery');
+
 
 /*
  * TESTING FUNCTIONS
  */
 /*
+select ggdb.update_reporter('katie', 'Bobby', 'Brady', '$5.00');
+
+
+
+
 select ggdb.get_workflows();
 select ggdb.get_nodes('X');
 
