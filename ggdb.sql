@@ -552,8 +552,8 @@ BEGIN
 		RAISE EXCEPTION 'gossip guy app:  reporter username >%< does not exist', p_username;
 	END IF;
 	
-	Update ggdb.reporter SET ggdb.reporter.first_name=p_first, ggdb.reporter.last_name=p_last, ggdb.reporter.commission=p_comm
-	WHERE ggdb.reporter.username=p_username;
+	Update ggdb.reporter SET first_name=p_first, last_name=p_last, commission=p_comm
+	WHERE username=p_username;
 END;
 $PROC$ LANGUAGE plpgsql;
 
