@@ -500,7 +500,6 @@ BEGIN
 			RETURN NEXT childrow;
 		END LOOP;
 	RETURN;
-
 END;
 $PROC$ LANGUAGE plpgsql;
 
@@ -532,10 +531,9 @@ BEGIN
 		(p_username, p_first, p_last, p_comm);
 END;
 
-/* Call Revision History Funciton Here
+/* Call Revision History Function Here
  */
 $PROC$ LANGUAGE plpgsql;
-);
 
 /*
  * DOCUMENT:  Update Reporter
@@ -550,26 +548,29 @@ CREATE OR REPLACE FUNCTION ggdb.update_reporter (
 RETURNS void AS $PROC$
 BEGIN
 
-	IF p_username IN (select R.username from ggdb.reporter R where R.username = p_username) THEN
-		RAISE EXCEPTION 'gossip guy app:  reporter username >%< already exists', p_username;
+	IF p_username NOT IN (select R.username from ggdb.reporter R where R.username = p_username) THEN
+		RAISE EXCEPTION 'gossip guy app:  reporter username >%< does not exist', p_username;
 	END IF;
+/*
+	Update ggdb.reporter SET
+		username
+		;
 
-	Update ggdb.reporter (username, first_name, last_name, commission) VALUES
+	(username, first_name, last_name, commission) 
 		(p_username, p_first, p_last, p_comm);
+		*/
 END;
 $PROC$ LANGUAGE plpgsql;
 
 /* Call Revision History Funciton Here
  */
-);
 
 /* DOCUMENT: Create Nick_Name for table celebrity if 
-/*
  * DOCUMENT:  Add Celebrity
  * @Author: Xing
  */
 CREATE OR REPLACE FUNCTION ggdb.add_celebrity (
-		, p_first varchar(64)
+		p_first varchar(64)
 		, p_last varchar(64)
 		, p_nick varchar(64)
 		, p_bday date
@@ -585,15 +586,14 @@ BEGIN
 		(p_first, p_last, p_nick, p_bday);
 END;
 $PROC$ LANGUAGE plpgsql;
-);
 
 /*
  * DOCUMENT:  Create Gossip
  * @Author: Katie
  */
  
-CREATE OR REPLACE FUNCTION ggdb.create_gossip
-		, p_workflow
+CREATE OR REPLACE FUNCTION ggdb.create_gossip (
+		p_workflow
 		, p_nodeshortname
 		, p_reporter
 		, p_celebrity
@@ -609,7 +609,7 @@ DECLARE
 	gossipid INTEGER;
 	
 BEGIN
-	select ggdb.workflow.id into workflowid from ggdb.workflow where ggdb.workflow.name = p_workflowname;
+	select ggdb.workflow.id into workflowid from ggdb.workflow where ggdb.workflow.name = p_workflow;
 	IF NOT FOUND THEN
 		RAISE EXCEPTION 'gossip guy app:  workflow >%< not found', p_workflow;
 	END IF;
@@ -653,7 +653,6 @@ BEGIN
 		gossipid
 		, celebrityid
 		);
-
 END;
 $PROC$ LANGUAGE plpgsql;
 
@@ -706,7 +705,6 @@ BEGIN
 		(p_id, p_bundle_id, p_name);
 END;
 $PROC$ LANGUAGE plpgsql;
-);
 
 
 /*
@@ -729,7 +727,6 @@ BEGIN
 		(p_id, p_bundle_id, p_name);
 END;
 $PROC$ LANGUAGE plpgsql;
-);
  
  
  /*
@@ -782,10 +779,10 @@ select ggdb.add_node ('def', 'pub', 'publish', 'A');
 select ggdb.link_from_start ('def', 'zzz', '');
 select ggdb.link_to_finish ('def', 'zzz', '');
 select ggdb.link_between('def', 'dra', 'pub');
-
-select ggdb.add_reporter('katie', 'Katie', 'Ho', '10000');
+/*
+select ggdb.add_reporter('katie', 'Katie', 'Ho', '$10000.00');
 select ggdb.add_celebrity('Kirsten', 'Stewart', 'kstew', '2012-03-30');
-
+*/
 
 /*
  * TESTING FUNCTIONS
