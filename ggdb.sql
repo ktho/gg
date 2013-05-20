@@ -84,9 +84,9 @@ CREATE TABLE ggdb.gossip_node (
  */
 CREATE TABLE ggdb.reporter (
 	id		SERIAL PRIMARY KEY,
-	username	varchar(64) check (username ~* '^[abcdefghijklmnopqrstuvwxyz ]+$') UNIQUE NOT NULL,
-	first_name	varchar(64) check (first_name ~* '^[abcdefghijklmnopqrstuvwxyz-. ]+$') NOT NULL,
-	last_name	varchar(64) check (last_name ~* '^[abcdefghijklmnopqrstuvwxyz-. ]+$') NOT NULL,
+	username	varchar(64) check (username ~* '^[abcdefghijklmnopqrstuvwxyz .]+$') UNIQUE NOT NULL,	
+	first_name	varchar(64) check (first_name ~* '^[abcdefghijklmnopqrstuvwxyz .]+$') NOT NULL,
+	last_name	varchar(64) check (last_name ~* '^[abcdefghijklmnopqrstuvwxyz .]+$') NOT NULL,
 	commission	money	
 );
 
@@ -95,9 +95,9 @@ CREATE TABLE ggdb.reporter (
  */
 CREATE TABLE ggdb.celebrity (
 	id		SERIAL PRIMARY KEY,
-	nick_name	varchar(64) check (nick_name ~* '^[abcdefghijklmnopqrstuvwxyz-. ]+$') UNIQUE NOT NULL,	
-	first_name	varchar(64) check (first_name ~* '^[abcdefghijklmnopqrstuvwxyz ]+$') NOT NULL,
-	last_name	varchar(64) check (last_name ~* '^[abcdefghijklmnopqrstuvwxyz-. ]+$') NOT NULL,
+	nick_name	varchar(64) check (nick_name ~* '^[abcdefghijklmnopqrstuvwxyz .]+$') UNIQUE NOT NULL,	
+	first_name	varchar(64) check (first_name ~* '^[abcdefghijklmnopqrstuvwxyz .]+$') NOT NULL,
+	last_name	varchar(64) check (last_name ~* '^[abcdefghijklmnopqrstuvwxyz .]+$') NOT NULL,
 	birthdate	date	
 );
 
@@ -586,7 +586,7 @@ $PROC$ LANGUAGE plpgsql;
  * DOCUMENT:  Create Gossip
  * @Author: Katie
  */
- 
+ /*
 CREATE OR REPLACE FUNCTION ggdb.create_gossip (
 		p_workflow
 		, p_nodeshortname
@@ -616,12 +616,12 @@ BEGIN
 
 	select ggdb.reporter.id into reporterid from ggdb.reporter where ggdb.reporter.username = p_reporter;
 	IF NOT FOUND THEN
-		RAISE EXCEPTION 'gossip guy app:  reporter >%< not found', p_workflow;
+		RAISE EXCEPTION 'gossip guy app:  reporter >%< not found', p_reporter;
 	END IF;
 
 	select ggdb.celebrity.id into celebrityid from ggdb.celebrity where ggdb.celeberity.nick_name = p_celebrity;
 	IF NOT FOUND THEN
-		RAISE EXCEPTION 'gossip guy app:  celebrity >%< not found', p_workflow;
+		RAISE EXCEPTION 'gossip guy app:  celebrity >%< not found', p_celebrity;
 	END IF;
 
 	INSERT INTO ggdb.gossip (title, body) VALUES
@@ -634,7 +634,7 @@ BEGIN
 		(
 		nodeid
 		, gossipid
-		, clock_timestamop()
+		, clock_timestamp()
 		);
 
 	INSERT INTO ggdb.reporter_gossip(reporter_id, gossip_id) VALUES
@@ -650,6 +650,7 @@ BEGIN
 		);
 END;
 $PROC$ LANGUAGE plpgsql;
+*/
 
 
 /*
@@ -717,9 +718,10 @@ BEGIN
 	IF p_id NOT IN (select R.id from ggdb.tag R) THEN
 		RAISE EXCEPTION 'gossip guy app:  tag >%< does not exist', p_name;
 	END IF;
-
+	/*
 	UPDATE ggdb.tag (id, bundle_id, name) VALUES
 		(p_id, p_bundle_id, p_name);
+	*/
 END;
 $PROC$ LANGUAGE plpgsql;
  
@@ -788,9 +790,9 @@ $PROC$ LANGUAGE plpgsql;
 select ggdb.create_workflow ('def', 'default');
 select ggdb.add_node ('def', 'dra', 'draft', 'A');
 select ggdb.add_node ('def', 'pub', 'publish', 'A');
-select ggdb.link_from_start ('def', 'zzz', '');
-select ggdb.link_to_finish ('def', 'zzz', '');
-select ggdb.link_between('def', 'dra', 'pub');
+select ggdb.link_from_start ('def', 'dra', '');
+select ggdb.link_to_finish ('def', 'pub', '');
+select ggdb.link_between('def', 'dra', 'pub', '');
 /*
 select ggdb.add_reporter('katie', 'Katie', 'Ho', '$10000.00');
 select ggdb.add_celebrity('Kirsten', 'Stewart', 'kstew', '2012-03-30');
