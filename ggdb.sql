@@ -699,6 +699,23 @@ $PROC$ LANGUAGE plpgsql;
  * TAGGING:  Delete Tag
  * @Author: cte13
  */
+ CREATE OR REPLACE FUNCTION ggdb.delete_tag (
+		p_id 			int,
+		p_bundle_id		int,
+		p_name			varchar(64)
+)
+RETURNS void AS $PROC$
+BEGIN
+
+	IF p_id NOT IN (select R.id from ggdb.tag R) THEN
+		RAISE EXCEPTION 'gossip guy app:  tag >%< does not exist', p_name;
+	END IF;
+
+	UPDATE ggdb.tag (id, bundle_id, name) VALUES
+		(p_id, p_bundle_id, p_name);
+END;
+$PROC$ LANGUAGE plpgsql;
+);
  
 /*
  * TAGGING:  Create Bundle
