@@ -552,7 +552,7 @@ BEGIN
 		RAISE EXCEPTION 'gossip guy app:  reporter username >%< does not exist', p_username;
 	END IF;
 	
-	Update ggdb.reporter SET ggdb.reporter.first_name=p_first, ggdb.reporter.last_name=p_last, ggdb.reporter.commission=p_comm VALUES
+	Update ggdb.reporter SET ggdb.reporter.first_name=p_first, ggdb.reporter.last_name=p_last, ggdb.reporter.commission=p_comm
 	WHERE ggdb.reporter.username=p_username;
 END;
 $PROC$ LANGUAGE plpgsql;
@@ -746,7 +746,6 @@ BEGIN
 		(p_id, p_bundle_id, p_name);
 END;
 $PROC$ LANGUAGE plpgsql;
-);
  
 /*
  * TAGGING:  Create Bundle
