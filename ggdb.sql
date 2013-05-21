@@ -32,7 +32,7 @@ CREATE DOMAIN ggdb.nodetype char(1)
 		'F', 	--Fork node
 		'J',  	--Joiner node
 		'S',	--Starting node
-		'E'	--Ending node
+		'E'		--Ending node
 		   )
          );
 
@@ -687,19 +687,41 @@ $PROC$ LANGUAGE plpgsql;
  * @Author: cte13
  */
 CREATE OR REPLACE FUNCTION ggdb.create_tag (
-		p_id 			int,
-		p_bundle_id		int,
-		p_name			varchar(64)
+	p_title			varchar(128),
+	p_bname			int,
+	p_tname			varchar(64)
 )
 RETURNS void AS $PROC$
+DECLARE
+	bid		INTEGER;
+	gid		INTEGER;
+	tid		INTEGER;
 BEGIN
-
-	IF p_id IN (select R.id from ggdb.tag R) THEN
+	SELECT G.id INTO gid FROM ggdb.gossip G WHERE G.title = p_title;
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'gossip guy app:  title >%< not found', p_title;
+	END IF;
+	
+	IF p_tname IN (select T.name from ggdb.tag T) THEN
 		RAISE EXCEPTION 'gossip guy app:  tag >%< already exists', p_name;
 	END IF;
-
-	INSERT INTO ggdb.tag (id, bundle_id, name) VALUES
-		(p_id, p_bundle_id, p_name);
+	
+	SELECT B.id INTO bid FROM ggdb.bundle B WHERE B.name = p_bname;
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'gossip guy app:  bundle >%< not found', p_bname;
+		-- Possible to create a bundle if it does not exist... better option?
+	END IF;
+	
+	INSERT INTO ggdb.tag (bundle_id, name) VALUES
+		(bid, p_name);
+		
+	SELECT T.id INTO tid FROM ggdb.tag T WHERE T.name = p_tname;
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'gossip guy app: error with tag >%< not found', p_title;
+	END IF;
+		
+	INSERT INTO ggdb.gossip_tag (gossip_id, tag_id) VALUES
+		(gid, tid);
 END;
 $PROC$ LANGUAGE plpgsql;
 
@@ -709,73 +731,173 @@ $PROC$ LANGUAGE plpgsql;
  * @Author: cte13
  */
 CREATE OR REPLACE FUNCTION ggdb.update_tag (
-		p_id 			int,
-		p_bundle_id		int,
-		p_name			varchar(64)
+		p_name			varchar(64),
+		p_newbname		varchar(64),
+		p_newname		varchar(64)
 )
 RETURNS void AS $PROC$
+DECLARE
+	new_bid		INTEGER;
 BEGIN
-
-	IF p_id NOT IN (select R.id from ggdb.tag R) THEN
+	IF p_name NOT IN (select R.name from ggdb.tag R) THEN
 		RAISE EXCEPTION 'gossip guy app:  tag >%< does not exist', p_name;
 	END IF;
-	/*
-	UPDATE ggdb.tag (id, bundle_id, name) VALUES
-		(p_id, p_bundle_id, p_name);
-	*/
+	
+	SELECT B.id INTO new_bid FROM ggdb.bundle B WHERE B.name = p_newbname;
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'gossip guy app:  bundle >%< not found', p_bname;
+		-- Possible to create a bundle if it does not exist... better option?
+	END IF;	
+
+	UPDATE ggdb.tag T SET T.name = p_newname, T.bundle_id = new_bid
+		WHERE T.name = p_name;
 END;
 $PROC$ LANGUAGE plpgsql;
- 
+
  
  /*
  * TAGGING:  Delete Tag
  * @Author: cte13
  */
- /*
  CREATE OR REPLACE FUNCTION ggdb.delete_tag (
-		p_id 			int,
-		p_bundle_id		int,
 		p_name			varchar(64)
 )
 RETURNS void AS $PROC$
+DECLARE
+	id		INTEGER;
 BEGIN
-
-	IF p_id NOT IN (select R.id from ggdb.tag R) THEN
+	SELECT T.id INTO id FROM ggdb.tag T WHERE T.name = p_name;
+	IF NOT FOUND THEN
 		RAISE EXCEPTION 'gossip guy app:  tag >%< does not exist', p_name;
 	END IF;
 
-	UPDATE ggdb.tag (id, bundle_id, name) VALUES
-		(p_id, p_bundle_id, p_name);
+	DELETE FROM ggdb.tag T WHERE T.id = id;
 END;
 $PROC$ LANGUAGE plpgsql;
- */
 
  
 /*
  * TAGGING:  Create Bundle
  * @Author: cte13
  */
- 
+CREATE OR REPLACE FUNCTION ggdb.create_bundle (
+		p_name		varchar(64)
+)
+RETURNS void AS $PROC$
+BEGIN
+	IF p_name IN (select B.name from ggdb.bundle B) THEN
+		RAISE EXCEPTION 'gossip guy app:  tag >%< already exists', p_name;
+	END IF;
+
+	INSERT INTO ggdb.bundle (name) VALUES
+		(p_name);
+END;
+$PROC$ LANGUAGE plpgsql;
+
  /*
  * TAGGING:  Update Bundle
  * @Author: cte13
  */
- 
+CREATE OR REPLACE FUNCTION ggdb.update_bundle (
+		p_name			varchar(64),
+		p_newname		varchar(64)
+)
+RETURNS void AS $PROC$
+BEGIN
+	IF p_name NOT IN (select B.name from ggdb.bundle B) THEN
+		RAISE EXCEPTION 'gossip guy app: bundle >%< does not exist', p_name;
+	END IF;
+
+	UPDATE ggdb.bundle B SET B.name = p_newname
+		WHERE T.name = p_name;
+END;
+$PROC$ LANGUAGE plpgsql;
+
  /*
  * TAGGING:  Delete Bundle
  * @Author: cte13
  */
+CREATE OR REPLACE FUNCTION ggdb.delete_bundle (
+		p_name			varchar(64)
+)
+RETURNS void AS $PROC$
+BEGIN
+	IF p_name NOT IN (select B.name from ggdb.bundle B) THEN
+		RAISE EXCEPTION 'gossip guy app: bundle >%< does not exist', p_name;
+	END IF;
+
+	DELETE FROM ggdb.bundle B WHERE B.name = p_name;
+END;
+$PROC$ LANGUAGE plpgsql;
  
  /*
  * TAGGING:  View Gossip by Tag
  * @Author: cte13
  */
- 
+CREATE OR REPLACE FUNCTION ggdb.view_tag (
+		p_name		varchar(64)
+)
+RETURNS TABLE (
+	title		varchar(128),
+	body		text
+) AS $PROC$
+DECLARE
+	tid		INTEGER;
+	gid		RECORD;
+BEGIN
+	select T.id into tid from ggdb.tag T where T.name = p_name;
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'gossip guy app:  tag >%< not found', p_name;
+	END IF;
+
+	select B.id into gid from ggdb.gossip_tag B where B.tag_id = tid;
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'gossip guy app:  tag >%< not in use', p_name;
+	END IF;
+	
+	RETURN QUERY (SELECT G.title, G.body FROM ggdb.gossip G WHERE G.id IN (
+		SELECT * FROM gid
+		));
+END;
+$PROC$ LANGUAGE plpgsql;
+
 /*
  * TAGGING:  View Gossip by Bundle
  * @Author: cte13
  */
- 
+ CREATE OR REPLACE FUNCTION ggdb.view_bundle (
+		p_name		varchar(64)
+)
+RETURNS TABLE (
+	title		varchar(128),
+	body		text
+) AS $PROC$
+DECLARE
+	bid		INTEGER;
+	tid		INTEGER;
+	gid		RECORD;
+BEGIN
+	select B.id into bid from ggdb.bundle B where B.name = p_name;
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'gossip guy app:  bundle >%< not found', p_name;
+	END IF;
+
+	select T.id into tid from ggdb.tag T where T.bundle_id = bid;
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'gossip guy app:  bundle >%< does not contain any tags', p_name;
+	END IF;
+
+	select G.id into gid from ggdb.gossip_tag G where G.tag_id = tid;
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'gossip guy app:  tag >%< not in use', p_name;
+	END IF;
+	
+	RETURN QUERY (SELECT G.title, G.body FROM ggdb.gossip G WHERE G.id IN (
+		SELECT * FROM gid
+		));
+END;
+$PROC$ LANGUAGE plpgsql;
+
 /*
  ********************************************************************************
    UTILITY MODULE FUNCTIONS:   
