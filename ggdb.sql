@@ -529,10 +529,10 @@ BEGIN
 
 	INSERT INTO ggdb.reporter (username, first_name, last_name, commission) VALUES
 		(p_username, p_first, p_last, p_comm);
+	/* Call Revision History Funciton Here
+	*/ 
 END;
 
-/* Call Revision History Function Here
- */
 $PROC$ LANGUAGE plpgsql;
 
 /*
@@ -554,11 +554,12 @@ BEGIN
 	
 	Update ggdb.reporter SET first_name=p_first, last_name=p_last, commission=p_comm
 	WHERE username=p_username;
-END;
+	/* Call Revision History Funciton Here
+	*/ 
+ END;
 $PROC$ LANGUAGE plpgsql;
 
-/* Call Revision History Funciton Here
- */
+
 
 /* DOCUMENT: Create Nick_Name for table celebrity if 
  * DOCUMENT:  Add Celebrity
@@ -579,6 +580,9 @@ BEGIN
 
 	INSERT INTO ggdb.celebrity (first_name, last_name, nick_name, birthdate) VALUES
 		(p_first, p_last, p_nick, p_bday);
+	
+	/* Call Revision History Funciton Here
+	*/ 
 END;
 $PROC$ LANGUAGE plpgsql;
 
