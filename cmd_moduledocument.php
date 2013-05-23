@@ -10,40 +10,88 @@
 //
 // }
 
-// /*
-//  * This function dispatches a workflow command and its parameters to the corresponding function 
-//  */
-// function dispatchCmd($cmd, $cmd_list) 
-// {
-// 	global $gResult;
-// 	$status = cCmdStatus_NOT_FOUND;
+/*
+ * This function dispatches a document command and its parameters to the corresponding function 
+ */
+function dispatchDocumentCmd($cmd, $cmd_list) 
+{
+	global $gResult;
+	$status = cCmdStatus_NOT_FOUND;
 	
-// 	$cmd = $cmd_list[0];
-// 	if ($cmd != "workflow") {
-// 		$status = cCmdStatus_NOT_FOUND; 
-// 		return $status;
-// 	}
+	$cmd = $cmd_list[0];
+	if ($cmd != "reporter") || ($cmd != "celebrity") || ($cmd != "gossip") {
+		$status = cCmdStatus_NOT_FOUND; 
+		return $status;
+		}
+	
+	if ($cmd == "reporter") { 
 
-// 	$arg1 = "";
-// 	if (count($cmd_list) > 1) {
-// 		$arg1 = $cmd_list[1];
-// 	}
+		// $arg1 = "";
+		// if (count($cmd_list) > 1) {
+		// $arg1 = $cmd_list[1];
+		// }
 	
-// 	if ($arg1 == "create") {
-// 		$status = wf_create($cmd_list);
-// 	}
-// 	elseif ($arg1 == "delete") {
-// 		$status = wf_delete($cmd_list);
-// 	}
-// 	elseif ($arg1 == "list") {
-// 		$status = wf_list($cmd_list);
-// 	}
-// 	else {
-// 		$status = cCmdStatus_NOT_FOUND; 
-// 	}
+		// if ($arg1 == "create") {
+		// 	$status = wf_create($cmd_list);
+		// }
+		// elseif ($arg1 == "delete") {
+		// $status = wf_delete($cmd_list);
+		// }
+		// elseif ($arg1 == "list") {
+		// 	$status = wf_list($cmd_list);
+		// }
+		// else {
+		// 	$status = cCmdStatus_NOT_FOUND; 
+
+		}
+
+	if ($cmd == "celebrity") { 
+
+		// $arg1 = "";
+		// if (count($cmd_list) > 1) {
+		// $arg1 = $cmd_list[1];
+		// }
 	
-// 	return $status;
-// }
+		// if ($arg1 == "create") {
+		// 	$status = wf_create($cmd_list);
+		// }
+		// elseif ($arg1 == "delete") {
+		// $status = wf_delete($cmd_list);
+		// }
+		// elseif ($arg1 == "list") {
+		// 	$status = wf_list($cmd_list);
+		// }
+		// else {
+		// 	$status = cCmdStatus_NOT_FOUND; 
+
+		}
+
+	if ($cmd == "gossip") { 
+
+		// $arg1 = "";
+		// if (count($cmd_list) > 1) {
+		// $arg1 = $cmd_list[1];
+		// }
+	
+		// if ($arg1 == "create") {
+		// 	$status = wf_create($cmd_list);
+		// }
+		// elseif ($arg1 == "delete") {
+		// $status = wf_delete($cmd_list);
+		// }
+		// elseif ($arg1 == "list") {
+		// 	$status = wf_list($cmd_list);
+		// }
+		// else {
+		// 	$status = cCmdStatus_NOT_FOUND; 
+
+		}
+	return $status;
+
+	}
+
+
+}
 
 
 // /*
