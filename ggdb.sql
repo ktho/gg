@@ -559,9 +559,7 @@ BEGIN
  END;
 $PROC$ LANGUAGE plpgsql;
 
-
-
-/* DOCUMENT: Create Nick_Name for table celebrity if 
+/*
  * DOCUMENT:  Add Celebrity
  * @Author: Xing
  */
@@ -572,8 +570,14 @@ CREATE OR REPLACE FUNCTION ggdb.add_celebrity (
 		, p_bday date
 )
 RETURNS void AS $PROC$
+
 BEGIN
 
+	--DOCUMENT: Create Nick_Name for table celebrity if the user doesn't specify the nickname
+	IF p_nick IS NULL THEN
+		p_nick := p_first ||p_last;
+	END IF;
+	
 	IF p_nick IN (select C.nick_name from ggdb.celebrity C where c.nick_name = p_nick) THEN
 		RAISE EXCEPTION 'gossip guy app:  celebrity >%< already exists', p_first || ' ' ||p_last;
 	END IF;
@@ -581,6 +585,31 @@ BEGIN
 	INSERT INTO ggdb.celebrity (first_name, last_name, nick_name, birthdate) VALUES
 		(p_first, p_last, p_nick, p_bday);
 	
+	/* Call Revision History Funciton Here
+	*/ 
+END;
+$PROC$ LANGUAGE plpgsql;
+
+/*
+ * DOCUMENT:  Update Celebrity
+ * @Author: Xing
+ */
+CREATE OR REPLACE FUNCTION ggdb.update_celebrity (
+		p_first varchar(64)
+		, p_last varchar(64)
+		, p_nick varchar(64)
+		, p_bday date
+)
+RETURNS void AS $PROC$
+
+BEGIN
+
+	IF p_nick NOT IN (select c.nick_name from ggdb.celebrity c where c.nick_name = p_nick) THEN
+		RAISE EXCEPTION 'gossip guy app:  celebrity nickname >%< does not exist', p_nick;
+	END IF;
+	
+	Update ggdb.celebrity SET first_name=p_first, last_name=p_last, birthdate=p_bday
+	WHERE nick_name=p_nick;
 	/* Call Revision History Funciton Here
 	*/ 
 END;
