@@ -686,40 +686,8 @@ BEGIN
 END;
 $PROC$ LANGUAGE plpgsql;
 
- /*
- * DOCUMENT:  Add Celebrity To Gossip
- * @Author: Katie
- */
- 
-CREATE OR REPLACE FUNCTION ggdb.add_celebrity_to_gossip (
-		  p_celebritynickname VARCHAR (64)
-		, p_gossipid INTEGER
-)
-RETURNS void AS $PROC$
-DECLARE
-	celebrityid INTEGER;
-	gossipid INTEGER;
-BEGIN
-	SELECT ggdb.celebrity.id INTO celebrityid FROM ggdb.celebrity WHERE ggdb.celebrity.nick_name = p_celebritynickname;
-	IF NOT FOUND THEN
-		RAISE EXCEPTION 'gossip guy app:  celebrity >%< not found', p_reporter;
-	END IF;
 
-	SELECT ggdb.gossip.id INTO gossipid FROM ggdb.gossip WHERE ggdb.gossip.id = p_gossipid;
-	IF NOT FOUND THEN
-		RAISE EXCEPTION 'gossip guy app:  the gossip id >%< not found', p_reporter;
-	END IF;	
-
-	INSERT INTO ggdb.celebrity_gossip(celebrity_id, gossip_id) VALUES
-		(
-		celebrityid
-		, gossipid
-		);
-END;
-$PROC$ LANGUAGE plpgsql;
-
-
- /*
+/*
  * DOCUMENT:  Update Gossip
  */
 --CREATE OR REPLACE FUNCTION ggdb.
@@ -988,9 +956,6 @@ select ggdb.add_celebrity('Kirsten', 'Stewart', 'kstew', '2012-03-30');
 select ggdb.create_gossip('def', 'dra', 'katie', 'kstew', 'Kstew is in another scandal!', 'kstew tweets about whether she should get plastic surgery');
 select ggdb.update_reporter('katie', 'Bobby', 'Brady', '$5.00');
 select ggdb.update_celebrity('Kristen','Stewart', 'kstew', '1990-05-20');
-select ggdb.add_celebrity('Robert', 'Pattinson', 'RPat', '2013-05-30');
-select ggdb.add_celebrity_to_gossip('RPat', 1);
-
 
 /*
  * TESTING FUNCTIONS
