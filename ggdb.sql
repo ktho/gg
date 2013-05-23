@@ -658,6 +658,16 @@ END;
 $PROC$ LANGUAGE plpgsql;
 
 
+
+/*
+add_reporter_to_gossip
+add_celebrity_to_gossip
+add_tag_to_gossip
+*/
+
+
+
+
 /*
  * DOCUMENT:  Update Gossip
  */
@@ -933,7 +943,13 @@ select ggdb.create_gossip('def', 'dra', 'katie', 'kstew', 'Kstew is in another s
 /*
 select ggdb.update_reporter('katie', 'Bobby', 'Brady', '$5.00');
 
+select * from ggdb.reporter;
 
+select * from ggdb.gossip;
+
+select * from ggdb.gossip_node;
+select * from ggdb.reporter_gossip;
+select * from ggdb.celebrity_gossip;
 
 
 select ggdb.get_workflows();
