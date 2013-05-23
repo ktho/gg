@@ -963,7 +963,9 @@ select ggdb.update_celebrity('Kristen','Stewart', 'kstew', '1990-05-20');
 /*
 
 
+select * from ggdb.gossip;
 
+select * from ggdb.gossip_node;
 
 select ggdb.get_workflows();
 select ggdb.get_nodes('X');
