@@ -41,6 +41,11 @@ function dispatchCommand($cmd_list)
 		return $status; 
 	}
 
+	$status = dispatchDocumentCmd($cmd, $cmd_list); 
+	if ($status != cCmdStatus_NOT_FOUND) {
+		return $status; 
+	}
+
 	// You could sent the command to other dispatchers if desired ... 
 	// $status = dispatchXxxxCmd($cmd, $cmd_list); 
 
