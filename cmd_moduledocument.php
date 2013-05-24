@@ -3,6 +3,21 @@
  * filename: cmd_document.php 
  */
 
+function getValue($prop_name, $cmd_list)
+{
+	$prop_value = NULL;
+
+	for ($k=0; $k < count($cmd_list); $k++) 
+	{
+		if ($cmd_list[$k] == $prop_name) {
+			if ($k+1 < count($cmd_list)) {
+				$prop_value = $cmd_list[$k+1];		
+			}
+
+		}
+	}
+	return $prop_value;
+}
 
 
 //	foreach $cmd_list as $t {
@@ -44,6 +59,7 @@ function dispatchDocumentCmd($cmd, $cmd_list)
 			$status = cCmdStatus_NOT_FOUND; 
 
 		}
+	}
 
 	if ($cmd == "celebrity") { 
 
@@ -61,6 +77,7 @@ function dispatchDocumentCmd($cmd, $cmd_list)
 		else {
 			$status = cCmdStatus_NOT_FOUND; 
 		}
+	}
 
 	if ($cmd == "gossip") { 
 
@@ -168,3 +185,4 @@ function celebrity_add($cmd_list) {
 	$gResult = $t . print_r($cmd_list,true);
 	return cCmdStatus_OK; 
 }
+?>
