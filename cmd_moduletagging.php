@@ -1,4 +1,4 @@
-// <?php
+<?php
 /*
  * filename: cmd_tagging.php 
  */
@@ -343,4 +343,4 @@
 // 	$gResult = $t . print_r($cmd_list,true);
 // 	return cCmdStatus_OK; 
 // }
-//?>
+?>
