@@ -12,7 +12,7 @@
 // /*
 //  * This function dispatches a workflow command and its parameters to the corresponding function 
 //  */
-//function dispatchUtilityCmd($cmd, $cmd_list) 
+function dispatchUtilityCmd($cmd, $cmd_list) 
 // {
 // 	global $gResult;
 // 	$status = cCmdStatus_NOT_FOUND;

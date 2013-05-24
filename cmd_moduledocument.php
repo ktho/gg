@@ -3,6 +3,10 @@
  * filename: cmd_document.php 
  */
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> parent of 5c3833e... debug PHP
 
 //	foreach $cmd_list as $t {
 //
@@ -43,7 +47,6 @@ function dispatchDocumentCmd($cmd, $cmd_list)
 			$status = cCmdStatus_NOT_FOUND; 
 
 		}
-	}
 
 	if ($cmd == "celebrity") { 
 
@@ -61,7 +64,6 @@ function dispatchDocumentCmd($cmd, $cmd_list)
 		else {
 			$status = cCmdStatus_NOT_FOUND; 
 		}
-	}
 
 	if ($cmd == "gossip") { 
 
@@ -169,4 +171,3 @@ function celebrity_add($cmd_list) {
 	$gResult = $t . print_r($cmd_list,true);
 	return cCmdStatus_OK; 
 }
-?>
