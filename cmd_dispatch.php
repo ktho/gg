@@ -24,6 +24,27 @@ function dispatchCommand($cmd_list)
 	if ($status != cCmdStatus_NOT_FOUND) {
 		return $status; 
 	}
+
+	// Try to match the command against the tag module
+	// @ Author: Xing || 05/23/13 6:20pm
+	$status = dispatchTagCmd($cmd, $cmd_list); 
+	if ($status != cCmdStatus_NOT_FOUND) {
+		return $status; 
+	}
+
+	// Try to match the command against the tag module
+	// @ Author: Xing || 05/23/13 6:25pm
+	$status = dispatchUtilityCmd($cmd, $cmd_list); 
+	if ($status != cCmdStatus_NOT_FOUND) {
+		return $status; 
+	}
+
+	// Try to match the command against the tag module
+	// @ Author: Xing || 05/23/13 6:20pm
+	$status = dispatchTagCmd($cmd, $cmd_list); 
+	if ($status != cCmdStatus_NOT_FOUND) {
+		return $status; 
+	}
 	
 		// Try to match the command against the utility commands
 	$status = dispatchWorkflowCmd($cmd, $cmd_list); 

@@ -26,22 +26,22 @@ function dispatchDocumentCmd($cmd, $cmd_list)
 	
 	if ($cmd == "reporter") { 
 
-		// $arg1 = "";
-		// if (count($cmd_list) > 1) {
-		// $arg1 = $cmd_list[1];
-		// }
+		$arg1 = "";
+		if (count($cmd_list) > 1) {
+		$arg1 = $cmd_list[1];
+		}
 	
-		// if ($arg1 == "create") {
-		// 	$status = wf_create($cmd_list);
-		// }
-		// elseif ($arg1 == "delete") {
-		// $status = wf_delete($cmd_list);
-		// }
-		// elseif ($arg1 == "list") {
-		// 	$status = wf_list($cmd_list);
-		// }
-		// else {
-		// 	$status = cCmdStatus_NOT_FOUND; 
+		if ($arg1 == "add") {
+			$status = reporter_add($cmd_list);
+		}
+		elseif ($arg1 == "update") {
+		$status = reporter_update($cmd_list);
+		}
+		elseif ($arg1 == "delete") {
+			$status = reporter_del($cmd_list);
+		}
+		else {
+			$status = cCmdStatus_NOT_FOUND; 
 
 		}
 
