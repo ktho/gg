@@ -343,4 +343,4 @@ function link_children($cmd_list) {
 	$gResult = $t . print_r($cmd_list,true);
 	return cCmdStatus_OK; 
 }
-
+?>

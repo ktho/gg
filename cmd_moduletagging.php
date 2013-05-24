@@ -12,7 +12,7 @@
 // /*
 //  * This function dispatches a workflow command and its parameters to the corresponding function 
 //  */
-function dispatchTagCmd($cmd, $cmd_list) 
+//function dispatchTagCmd($cmd, $cmd_list) 
 // {
 // 	global $gResult;
 // 	$status = cCmdStatus_NOT_FOUND;
@@ -343,8 +343,4 @@ function dispatchTagCmd($cmd, $cmd_list)
 // 	$gResult = $t . print_r($cmd_list,true);
 // 	return cCmdStatus_OK; 
 // }
-<<<<<<< HEAD
 ?>
-=======
-
->>>>>>> parent of 5c3833e... debug PHP

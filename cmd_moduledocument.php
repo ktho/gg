@@ -3,10 +3,6 @@
  * filename: cmd_document.php 
  */
 
-<<<<<<< HEAD
-=======
-
->>>>>>> parent of 5c3833e... debug PHP
 
 //	foreach $cmd_list as $t {
 //
@@ -27,6 +23,7 @@ function dispatchDocumentCmd($cmd, $cmd_list)
 		return $status;
 		}
 	
+	
 	if ($cmd == "reporter") { 
 
 		$arg1 = "";
@@ -45,8 +42,9 @@ function dispatchDocumentCmd($cmd, $cmd_list)
 		}
 		else {
 			$status = cCmdStatus_NOT_FOUND; 
-
 		}
+	return $status;
+	}
 
 	if ($cmd == "celebrity") { 
 
@@ -64,6 +62,8 @@ function dispatchDocumentCmd($cmd, $cmd_list)
 		else {
 			$status = cCmdStatus_NOT_FOUND; 
 		}
+	return $status;
+	}
 
 	if ($cmd == "gossip") { 
 
@@ -75,50 +75,14 @@ function dispatchDocumentCmd($cmd, $cmd_list)
 		if ($arg1 == "create") {
 			$status = gossip_create($cmd_list);
 		}
-/*
-		elseif ($arg1 == "add") {
-		$status = wf_delete($cmd_list);
-		}
-		elseif ($arg1 == "list") {
-			$status = wf_list($cmd_list);
-		}*/
 		else {
 			$status = cCmdStatus_NOT_FOUND; 
 
 		}
 	return $status;
-
 	}
-
-
 }
 
-/*
- * Adds gossip
- */
-function gossip_create($cmd_list) {
-	global $gResult;
-
-	$wf = getValue("-wf",$cmd_list);
-	$sn = getValue("-sn",$cmd_list); 
-	$r = getValue("-r",$cmd_list); 
-	$c = getValue("-c",$cmd_list); 
-	$t = getValue("-t",$cmd_list); 
-	$b = getValue("-b",$cmd_list); 
-
-	if (($wf == NULL) || ($sn == NULL)|| ($r == NULL)|| ($c == NULL)|| ($t == NULL)|| ($b == NULL)) {
-		return cCmdStatus_ERROR; 
-	}
-
-
-	$sql = sprintf("select ggdb.create_gossip ('%s', '%s', '%s', '%s', '%s', '%s');", $wf, $sn, $r, $c, $t, $b);
-
-	$result = runScalarDbQuery($sql);
-
-	$t = "\n"; 
-	$gResult = $t . print_r($cmd_list,true);
-	return cCmdStatus_OK; 
-}
 
 /*
  * Add reporter
@@ -150,6 +114,7 @@ function reporter_add($cmd_list) {
  * Add celebrity
  * Author: Xing 5/23/13 9:46pm
  */
+
 function celebrity_add($cmd_list) {
 	global $gResult;
 
@@ -171,3 +136,33 @@ function celebrity_add($cmd_list) {
 	$gResult = $t . print_r($cmd_list,true);
 	return cCmdStatus_OK; 
 }
+
+
+/*
+ * Adds gossip
+ */
+function gossip_create($cmd_list) {
+	global $gResult;
+
+	$wf = getValue("-wf",$cmd_list);
+	$sn = getValue("-sn",$cmd_list); 
+	$r = getValue("-r",$cmd_list); 
+	$c = getValue("-c",$cmd_list); 
+	$t = getValue("-t",$cmd_list); 
+	$b = getValue("-b",$cmd_list); 
+
+	if (($wf == NULL) || ($sn == NULL)|| ($r == NULL)|| ($c == NULL)|| ($t == NULL)|| ($b == NULL)) {
+		return cCmdStatus_ERROR; 
+	}
+
+
+	$sql = sprintf("select ggdb.create_gossip ('%s', '%s', '%s', '%s', '%s', '%s');", $wf, $sn, $r, $c, $t, $b);
+
+	$result = runScalarDbQuery($sql);
+
+	$t = "\n"; 
+	$gResult = $t . print_r($cmd_list,true);
+	return cCmdStatus_OK; 
+}
+
+?>

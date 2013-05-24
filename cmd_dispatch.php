@@ -19,34 +19,21 @@ function dispatchCommand($cmd_list)
 	// The first element is the command name 
 	$cmd = $cmd_list[0]; 
 	
-	// Try to match the command against the utility commands
-	$status = dispatchUtilCmd($cmd, $cmd_list); 
-	if ($status != cCmdStatus_NOT_FOUND) {
-		return $status; 
-	}
-
-	// Try to match the command against the tag module
-	// @ Author: Xing || 05/23/13 6:20pm
-	$status = dispatchTagCmd($cmd, $cmd_list); 
-	if ($status != cCmdStatus_NOT_FOUND) {
-		return $status; 
-	}
+	// // Try to match the command against the tag module
+	// // @ Author: Xing || 05/23/13 6:20pm
+	// $status = dispatchTagCmd($cmd, $cmd_list); 
+	// if ($status != cCmdStatus_NOT_FOUND) {
+	// 	return $status; 
+	// }
 
 	// Try to match the command against the tag module
 	// @ Author: Xing || 05/23/13 6:25pm
-	$status = dispatchUtilityCmd($cmd, $cmd_list); 
-	if ($status != cCmdStatus_NOT_FOUND) {
-		return $status; 
-	}
-
-	// Try to match the command against the tag module
-	// @ Author: Xing || 05/23/13 6:20pm
-	$status = dispatchTagCmd($cmd, $cmd_list); 
-	if ($status != cCmdStatus_NOT_FOUND) {
-		return $status; 
-	}
+	// $status = dispatchUtilityCmd($cmd, $cmd_list); 
+	// if ($status != cCmdStatus_NOT_FOUND) {
+	// 	return $status; 
+	// }
 	
-		// Try to match the command against the utility commands
+	// Try to match the command against the utility commands
 	$status = dispatchWorkflowCmd($cmd, $cmd_list); 
 	if ($status != cCmdStatus_NOT_FOUND) {
 		return $status; 
