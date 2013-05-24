@@ -124,7 +124,7 @@ CREATE TABLE ggdb.celebrity_gossip (
  */
 CREATE TABLE ggdb.bundle (
 	id	SERIAL PRIMARY KEY,
-	name	varchar(64) check (name ~* '^[abcdefghijklmnopqrstuvwxyz-. ]+$') UNIQUE NOT NULL
+	name	varchar(64) check (name ~* '^[abcdefghijklmnopqrstuvwxyz .]+$') UNIQUE NOT NULL
 );
 
 /*
@@ -133,7 +133,7 @@ CREATE TABLE ggdb.bundle (
 CREATE TABLE ggdb.tag (
 	id		SERIAL PRIMARY KEY,
 	bundle_id	int references ggdb.bundle(id) on delete no action,
-	name		varchar(64) check (name ~* '^[abcdefghijklmnopqrstuvwxyz-. ]+$') UNIQUE NOT NULL
+	name		varchar(64) check (name ~* '^[abcdefghijklmnopqrstuvwxyz .]+$') UNIQUE NOT NULL
 );
 
 /*
@@ -752,13 +752,36 @@ BEGIN
 END;
 $PROC$ LANGUAGE plpgsql;
 
-
-
-
-
 /*
-add_tag_to_gossip
-*/
+ * DOCUMENT:  Add Tag To Gossip
+ * @Author: Katie
+ */
+CREATE OR REPLACE FUNCTION ggdb.add_tag_to_gossip (
+		  p_tagname VARCHAR (64)
+		, p_gossipid INTEGER
+)
+RETURNS void AS $PROC$
+DECLARE
+	tagid INTEGER;
+	gossipid INTEGER;
+BEGIN
+	SELECT ggdb.tag.id INTO tagid FROM ggdb.tag WHERE ggdb.tag.name = p_tagname;
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'gossip guy app:  tag >%< not found', p_reporter;
+	END IF;
+
+	SELECT ggdb.gossip.id INTO gossipid FROM ggdb.gossip WHERE ggdb.gossip.id = p_gossipid;
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'gossip guy app:  the gossip id >%< not found', p_reporter;
+	END IF;	
+
+	INSERT INTO ggdb.gossip_tag(tag_id, gossip_id) VALUES
+		(
+		tagid
+		, gossipid
+		);
+END;
+$PROC$ LANGUAGE plpgsql;
 
 
 
@@ -1035,6 +1058,18 @@ select ggdb.add_reporter_to_gossip('xingxu', 1);
 select ggdb.add_celebrity('Robert', 'Pattinson', 'RPat', '2013-05-30');
 select ggdb.add_celebrity_to_gossip('RPat', 1);
 
+
+INSERT INTO ggdb.bundle (name) VALUES
+	('relationship');
+
+INSERT INTO ggdb.tag (bundle_id, name) VALUES
+	(1, 'RPatKStew');
+
+INSERT INTO ggdb.tag (bundle_id, name) VALUES
+	(1, 'Brangelina');
+
+select ggdb.add_tag_to_gossip('RPatKStew', 1);
+select ggdb.add_tag_to_gossip('Brangelina', 1);
 /*
  * TESTING FUNCTIONS
  */
@@ -1042,7 +1077,7 @@ select ggdb.add_celebrity_to_gossip('RPat', 1);
 select ggdb.update_reporter('katie', 'Bobby', 'Brady', '$5.00');
 
 select * from ggdb.reporter;
-
+select * from ggdb.gossip_tag;
 select * from ggdb.gossip;
 
 <<<<<<< HEAD
@@ -1068,5 +1103,6 @@ select ggdb.find_loose_nodes('X');
 
 select * from ggdb.link;
 select * from ggdb.node;
+
 
 */
