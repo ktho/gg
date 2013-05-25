@@ -59,24 +59,26 @@ CREATE TABLE ggdb.link (
 	PRIMARY KEY (fromnode_id, tonode_id)
 );
 
+
 /*
  * DOCUMENT:  Represents gossip
  */
 CREATE TABLE ggdb.gossip (
 	id		SERIAL PRIMARY KEY,
-	title		varchar(128) NOT NULL,
-	body		text NOT NULL
+	node_id		int references ggdb.node(id) on delete no action,
+	publish_date	timestamp
 );
 
-
 /*
- * WORKFLOW/DOCUMENT:  Represents state of each gossip, bridges gossip and node
+ * DOCUMENT:  Represents versions of the gossip
  */
-CREATE TABLE ggdb.gossip_node (
-	node_id		int references ggdb.node(id) on delete no action,
-	gossip_id	int references ggdb.gossip(id) on delete no action,
-	time		timestamp NOT NULL,
-	PRIMARY KEY (node_id, gossip_id)
+CREATE TABLE ggdb.version (
+	id			SERIAL PRIMARY KEY,
+	gossip_id		int references ggdb.gossip(id) on delete no action,
+ 	title			varchar(128) NOT NULL,
+	body			text NOT NULL,
+	creation_time		timestamp,
+	is_current		boolean DEFAULT TRUE
 );
 
 /*
@@ -160,7 +162,6 @@ CREATE TABLE ggdb.revision_history (
    WORKFLOW MODULE FUNCTIONS:   
  ********************************************************************************
  */
-
 
 /*
  * WORKFLOW:  Function links node to starting node for that workflow
@@ -378,7 +379,6 @@ BEGIN
 	RETURN;
 END;
 $PROC$ LANGUAGE plpgsql;
-
 
 /*
  * WORKFLOW:  Function creates a workflow.
@@ -657,20 +657,20 @@ BEGIN
 		RAISE EXCEPTION 'gossip guy app:  celebrity >%< not found', p_celebrity;
 	END IF;
 
-	INSERT INTO ggdb.gossip (title, body) VALUES
-		(
-		p_title
-		, p_body
-		);
-
-	SELECT ggdb.gossip.id INTO gossipid FROM ggdb.gossip WHERE ggdb.gossip.title = p_title AND ggdb.gossip.body = p_body;
-
-	INSERT INTO ggdb.gossip_node(node_id, gossip_id, time) VALUES
+	INSERT INTO ggdb.gossip (node_id) VALUES
 		(
 		nodeid
-		, gossipid
-		, clock_timestamp()
 		);
+		
+	select currval('ggdb.gossip_id_seq') into gossipid;
+	
+	INSERT INTO ggdb.version (gossip_id, title, body, creation_time, is_current) VALUES (
+		gossipid
+		, p_title
+		, p_body
+		, clock_timestamp()
+		, TRUE
+	);
 
 	INSERT INTO ggdb.reporter_gossip(reporter_id, gossip_id) VALUES
 		(
