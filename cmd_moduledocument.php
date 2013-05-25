@@ -71,9 +71,12 @@ function dispatchDocumentCmd($cmd, $cmd_list)
 		if (count($cmd_list) > 1) {
 		$arg1 = $cmd_list[1];
 		}
-	
+
 		if ($arg1 == "create") {
 			$status = gossip_create($cmd_list);
+		}
+		else if ($arg1 == "add") {
+			$status = gossip_add($cmd_list);
 		}
 		else {
 			$status = cCmdStatus_NOT_FOUND; 
@@ -139,7 +142,7 @@ function celebrity_add($cmd_list) {
 
 
 /*
- * Adds gossip
+ * Creates gossip
  */
 function gossip_create($cmd_list) {
 	global $gResult;
@@ -160,9 +163,42 @@ function gossip_create($cmd_list) {
 
 	$result = runScalarDbQuery($sql);
 
+	$nl = "\n"; 
+	$gResult = $nl . print_r($cmd_list,true);
+	return cCmdStatus_OK; 
+}
+
+
+/*
+ * Add reporter, celebrity, and tag to gossip
+ */
+/*
+function gossip_add($cmd_list) {
+	global $gResult;
+
+	$gid = getValue("-gid",$cmd_list); 
+	if ($gid == null){
+		return cCmdStatus_Error
+	}
+
+	$r = getValue("-r",$cmd_list); 
+	$c = getValue("-c",$cmd_list); 
+	$t = getValue("-t",$cmd_list); 
+
+
+	if (($r == NULL) && ($c == NULL) && ($t == NULL)) {
+		return cCmdStatus_ERROR; 
+	}
+
+
+	$sql = sprintf("select ggdb.create_gossip ('%s', '%s', '%s', '%s', '%s', '%s');", $wf, $sn, $r, $c, $t, $b);
+
+	$result = runScalarDbQuery($sql);
+
 	$t = "\n"; 
 	$gResult = $t . print_r($cmd_list,true);
 	return cCmdStatus_OK; 
 }
+*/
 
 ?>
