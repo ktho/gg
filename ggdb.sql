@@ -575,7 +575,7 @@ BEGIN
 
 	--DOCUMENT: Create Nick_Name for table celebrity if the user doesn't specify the nickname
 	IF p_nick IS NULL THEN
-		p_nick := p_first ||p_last;
+		p_nick := p_first || ' ' || p_last;
 	END IF;
 	
 	IF p_nick IN (select C.nick_name from ggdb.celebrity C where c.nick_name = p_nick) THEN
@@ -736,12 +736,12 @@ DECLARE
 BEGIN
 	SELECT ggdb.celebrity.id INTO celebrityid FROM ggdb.celebrity WHERE ggdb.celebrity.nick_name = p_celebritynickname;
 	IF NOT FOUND THEN
-		RAISE EXCEPTION 'gossip guy app:  celebrity >%< not found', p_reporter;
+		RAISE EXCEPTION 'gossip guy app:  celebrity >%< not found', p_celebritynickname;
 	END IF;
 
 	SELECT ggdb.gossip.id INTO gossipid FROM ggdb.gossip WHERE ggdb.gossip.id = p_gossipid;
 	IF NOT FOUND THEN
-		RAISE EXCEPTION 'gossip guy app:  the gossip id >%< not found', p_reporter;
+		RAISE EXCEPTION 'gossip guy app:  the gossip id >%< not found', p_celebritynickname;
 	END IF;	
 
 	INSERT INTO ggdb.celebrity_gossip(celebrity_id, gossip_id) VALUES
@@ -767,12 +767,12 @@ DECLARE
 BEGIN
 	SELECT ggdb.tag.id INTO tagid FROM ggdb.tag WHERE ggdb.tag.name = p_tagname;
 	IF NOT FOUND THEN
-		RAISE EXCEPTION 'gossip guy app:  tag >%< not found', p_reporter;
+		RAISE EXCEPTION 'gossip guy app:  tag >%< not found', p_tagname;
 	END IF;
 
 	SELECT ggdb.gossip.id INTO gossipid FROM ggdb.gossip WHERE ggdb.gossip.id = p_gossipid;
 	IF NOT FOUND THEN
-		RAISE EXCEPTION 'gossip guy app:  the gossip id >%< not found', p_reporter;
+		RAISE EXCEPTION 'gossip guy app:  the gossip id >%< not found', p_gossipid;
 	END IF;	
 
 	INSERT INTO ggdb.gossip_tag(tag_id, gossip_id) VALUES
@@ -1057,24 +1057,25 @@ select ggdb.create_gossip('def', 'dra', 'katie', 'kstew', 'Kstew is in another s
 select ggdb.add_reporter_to_gossip('xingxu', 1);
 select ggdb.add_celebrity('Robert', 'Pattinson', 'RPat', '2013-05-30');
 select ggdb.add_celebrity_to_gossip('RPat', 1);
-
-
 INSERT INTO ggdb.bundle (name) VALUES
 	('relationship');
-
 INSERT INTO ggdb.tag (bundle_id, name) VALUES
 	(1, 'RPatKStew');
-
 INSERT INTO ggdb.tag (bundle_id, name) VALUES
 	(1, 'Brangelina');
+select ggdb.add_celebrity('Kim', 'Kardashian', NULL, '1980-05-30');
+select ggdb.add_celebrity('Cee Lo', 'Green', 'Cee Lo', '1970-05-30');
+select ggdb.add_celebrity('Brad', 'Pitt', 'Brad Pitt', '1976-05-30');
+select ggdb.add_reporter('Cory', 'Cory', 'Eurom', '$50000.00');
+select ggdb.add_reporter('Bob', 'Bobby', 'Brady', '$50000.00');
 
-select ggdb.add_tag_to_gossip('RPatKStew', 1);
-select ggdb.add_tag_to_gossip('Brangelina', 1);
 /*
  * TESTING FUNCTIONS
  */
 /*
 select ggdb.update_reporter('katie', 'Bobby', 'Brady', '$5.00');
+select ggdb.add_tag_to_gossip('RPatKStew', 1);
+select ggdb.add_tag_to_gossip('Brangelina', 1);
 
 select * from ggdb.reporter;
 select * from ggdb.gossip_tag;
@@ -1086,6 +1087,15 @@ select * from ggdb.gossip;
 select * from ggdb.gossip_node;
 select * from ggdb.reporter_gossip;
 select * from ggdb.celebrity_gossip;
+select * from ggdb.gossip_tag;
+
+select * from ggdb.gossip_tag gt
+	inner join ggdb.tag t on gt.tag_id = t.id;
+select * from ggdb.reporter_gossip rg
+	inner join ggdb.reporter r on rg.reporter_id = r.id;
+select * from ggdb.celebrity_gossip rg
+	inner join ggdb.celebrity c on rg.celebrity_id = c.id;
+		
 >>>>>>> parent of 6c1e62e... Tested add_celebrity and update_celebrity
 
 select * from ggdb.gossip_node;

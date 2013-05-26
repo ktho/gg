@@ -172,33 +172,44 @@ function gossip_create($cmd_list) {
 /*
  * Add reporter, celebrity, and tag to gossip
  */
-/*
 function gossip_add($cmd_list) {
 	global $gResult;
 
 	$gid = getValue("-gid",$cmd_list); 
 	if ($gid == null){
-		return cCmdStatus_Error
+		return cCmdStatus_Error;
 	}
 
-	$r = getValue("-r",$cmd_list); 
-	$c = getValue("-c",$cmd_list); 
-	$t = getValue("-t",$cmd_list); 
+	for ($k=0; $k < count($cmd_list); $k++) {
+		if (
+			(($cmd_list[$k] == "-r") 
+			|| ($cmd_list[$k] == "-c") 
+			|| ($cmd_list[$k] == "-t")) 
+			&& ($k+1 < count($cmd_list))
+			)
+		    {
+			
+			$val = $cmd_list[$k+1];		
+	
+			if (($cmd_list[$k] == "-r") && ($val != NULL)) {
+				$sql = sprintf("select ggdb.add_reporter_to_gossip ('%s', '%s');", $val, $gid);
+				}
 
+			if (($cmd_list[$k] == "-c") && ($val != NULL)) {
+				$sql = sprintf("select ggdb.add_celebrity_to_gossip ('%s', '%s');", $val, $gid);
+				}
 
-	if (($r == NULL) && ($c == NULL) && ($t == NULL)) {
-		return cCmdStatus_ERROR; 
+			if (($cmd_list[$k] == "-t") && ($val != NULL)) {
+				$sql = sprintf("select ggdb.add_tag_to_gossip ('%s', '%s');", $val, $gid);
+				}
+			
+			$result = runScalarDbQuery($sql);
+			$t = "\n"; 
+			$gResult = $t . print_r($cmd_list,true);
+		}
 	}
 
-
-	$sql = sprintf("select ggdb.create_gossip ('%s', '%s', '%s', '%s', '%s', '%s');", $wf, $sn, $r, $c, $t, $b);
-
-	$result = runScalarDbQuery($sql);
-
-	$t = "\n"; 
-	$gResult = $t . print_r($cmd_list,true);
 	return cCmdStatus_OK; 
 }
-*/
 
 ?>
