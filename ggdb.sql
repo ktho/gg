@@ -59,14 +59,23 @@ CREATE TABLE ggdb.link (
 	PRIMARY KEY (fromnode_id, tonode_id)
 );
 
-
 /*
  * DOCUMENT:  Represents gossip
  */
 CREATE TABLE ggdb.gossip (
 	id		SERIAL PRIMARY KEY,
+	publish_date	timestamp,
+	is_active	boolean
+);
+
+/*
+ * DOCUMENT/WORKFLOW:  Represents link between gossip and node (i.e. the status)
+ */
+CREATE TABLE ggdb.gossip_node (
+	gossip_id	int references ggdb.gossip(id) on delete no action,
 	node_id		int references ggdb.node(id) on delete no action,
-	publish_date	timestamp
+	start_time	timestamp,
+	PRIMARY KEY (gossip_id, node_id)
 );
 
 /*
@@ -656,12 +665,9 @@ BEGIN
 	IF NOT FOUND THEN
 		RAISE EXCEPTION 'gossip guy app:  celebrity >%< not found', p_celebrity;
 	END IF;
-
-	INSERT INTO ggdb.gossip (node_id) VALUES
-		(
-		nodeid
-		);
 		
+	INSERT INTO ggdb.gossip (publish_date, is_active) VALUES (NULL, FALSE);
+	
 	select currval('ggdb.gossip_id_seq') into gossipid;
 	
 	INSERT INTO ggdb.version (gossip_id, title, body, creation_time, is_current) VALUES (
@@ -671,6 +677,12 @@ BEGIN
 		, clock_timestamp()
 		, TRUE
 	);
+
+	INSERT INTO ggdb.gossip_node (gossip_id, node_id) VALUES
+		(
+		gossipid, 
+		nodeid
+		);
 
 	INSERT INTO ggdb.reporter_gossip(reporter_id, gossip_id) VALUES
 		(
