@@ -569,6 +569,31 @@ BEGIN
 $PROC$ LANGUAGE plpgsql;
 
 /*
+ * DOCUMENT:  Get list of reporters based off of criteria
+ * @Author: Xing
+ */
+CREATE OR REPLACE FUNCTION ggdb.get_reporter (
+		p_username varchar(64)
+		, p_first varchar(64)
+		, p_last varchar(64)
+		, p_comm money
+)
+RETURNS void AS $PROC$
+BEGIN
+
+	IF p_username NOT IN (select R.username from ggdb.reporter R where R.username = p_username) THEN
+		RAISE EXCEPTION 'gossip guy app:  reporter username >%< does not exist', p_username;
+	END IF;
+	
+	Update ggdb.reporter SET first_name=p_first, last_name=p_last, commission=p_comm
+	WHERE username=p_username;
+	/* Call Revision History Funciton Here
+	*/ 
+ END;
+$PROC$ LANGUAGE plpgsql;
+
+
+/*
  * DOCUMENT:  Add Celebrity
  * @Author: Xing
  */

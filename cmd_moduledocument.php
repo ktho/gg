@@ -114,6 +114,32 @@ function reporter_add($cmd_list) {
 }
 
 /*
+ * Update reporter
+ * Author: Xing 5/28/13 10:25pm
+ */
+function reporter_update($cmd_list) {
+	global $gResult;
+
+	$id = getValue("-id",$cmd_list);
+	$f = getValue("-f",$cmd_list); 
+	$l = getValue("-l",$cmd_list); 
+	$c = getValue("-c",$cmd_list); 
+
+	if (($id == NULL) || ($f == NULL)|| ($l == NULL)|| ($c == NULL)) {
+		return cCmdStatus_ERROR; 
+	}
+
+
+	$sql = sprintf("select ggdb.update_reporter ('%s', '%s', '%s', '%f');", $id, $f, $l, $c);
+
+	$result = runScalarDbQuery($sql);
+
+	$t = "\n"; 
+	$gResult = $t . print_r($cmd_list,true);
+	return cCmdStatus_OK; 
+}
+
+/*
  * Add celebrity
  * Author: Xing 5/23/13 9:46pm
  */
@@ -140,6 +166,32 @@ function celebrity_add($cmd_list) {
 	return cCmdStatus_OK; 
 }
 
+/*
+ * Add celebrity
+ * Author: Xing 5/23/13 10:46pm
+ */
+
+function celebrity_update($cmd_list) {
+	global $gResult;
+
+	$f = getValue("-f",$cmd_list); 
+	$l = getValue("-l",$cmd_list); 
+	$n = getValue("-n",$cmd_list);
+	$b = getValue("-b",$cmd_list); 
+
+	if (($n == NULL) || ($f == NULL)|| ($l == NULL)|| ($b == NULL)) {
+		return cCmdStatus_ERROR; 
+	}
+
+
+	$sql = sprintf("select ggdb.update_celebrity ('%s', '%s', '%s', '%s');", $f, $l, $n, $b);
+
+	$result = runScalarDbQuery($sql);
+
+	$t = "\n"; 
+	$gResult = $t . print_r($cmd_list,true);
+	return cCmdStatus_OK; 
+}
 
 /*
  * Creates gossip
