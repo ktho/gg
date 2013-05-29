@@ -597,6 +597,44 @@ BEGIN
  END;
 $PROC$ LANGUAGE plpgsql;
 
+/*
+ * DOCUMENT:  Get list of reporters based off of first name
+ * @Author: Xing
+ */
+CREATE OR REPLACE FUNCTION ggdb.get_reporter_by_fname (
+		p_first varchar(64)
+)
+RETURNS SETOF ggdb.Reporter AS $PROC$
+DECLARE
+	reporterid integer;
+	row2 RECORD;
+	reporterrow ggdb.Reporter%ROWTYPE;
+BEGIN
+	select r.id into reporterid from ggdb.reporter r where r.first_name = p_first;
+	
+	IF p_first NOT IN (select R.first_name from ggdb.reporter R) THEN
+		RAISE EXCEPTION 'gossip guy app:  reporter first name >%< does not exist', p_first;
+	END IF;
+	
+	FOR row2 IN SELECT * from ggdb.reporter R where r.first_name = p_first
+	LOOP
+
+		reporterrow.id := row2.id;
+		reporterrow.username := row2.username;
+		reporterrow.first_name := row2.first_name;
+		reporterrow.last_name := row2.last_name;
+		reporterrow.commission := row2.commission;
+
+		RETURN NEXT reporterrow;
+
+	END LOOP;
+	RETURN;
+	/* Call Revision History Funciton Here
+	*/ 
+ END;
+$PROC$ LANGUAGE plpgsql;
+
+
 
 /*
  * DOCUMENT:  Add Celebrity
