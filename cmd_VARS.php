@@ -78,8 +78,6 @@ function getValue($prop_name, $cmd_list)
 	return $prop_value;
 }
 
-
-
 /*
  *  Returns TRUE if the arg is found list list of commands 
  */
@@ -93,7 +91,6 @@ function argExists($arg, $cmd_list)
 		return FALSE; 
 	}
 }
-
 
 function fillArrayWithValues($array, $cmd_list) 
 {
