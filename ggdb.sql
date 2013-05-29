@@ -569,24 +569,29 @@ BEGIN
 $PROC$ LANGUAGE plpgsql;
 
 /*
- * DOCUMENT:  Get list of reporters based off of criteria
+ * DOCUMENT:  Get list of reporters based off of username
  * @Author: Xing
  */
-CREATE OR REPLACE FUNCTION ggdb.get_reporter (
+CREATE OR REPLACE FUNCTION ggdb.get_reporter_by_id (
 		p_username varchar(64)
-		, p_first varchar(64)
-		, p_last varchar(64)
-		, p_comm money
 )
-RETURNS void AS $PROC$
-BEGIN
+RETURNS TABLE (
+	id     		integer,
+	username	varchar(64),	
+	first_name	varchar(64),
+	last_name	varchar(64),
+	commission	money	) AS $PROC$
+DECLARE
+	row1 RECORD;
 
-	IF p_username NOT IN (select R.username from ggdb.reporter R where R.username = p_username) THEN
-		RAISE EXCEPTION 'gossip guy app:  reporter username >%< does not exist', p_username;
+BEGIN
+	select * into row1 from ggdb.reporter r where r.username = p_username;
+	
+	IF p_username NOT IN (select R.username from ggdb.reporter R) THEN
+		RAISE EXCEPTION 'gossip guy app:  reporter id >%< does not exist', p_username;
 	END IF;
 	
-	Update ggdb.reporter SET first_name=p_first, last_name=p_last, commission=p_comm
-	WHERE username=p_username;
+	RETURN QUERY (SELECT * FROM ggdb.reporter R WHERE R.username = row1.username);
 	/* Call Revision History Funciton Here
 	*/ 
  END;
@@ -1105,6 +1110,8 @@ select ggdb.add_celebrity('Cee Lo', 'Green', 'Cee Lo', '1970-05-30');
 select ggdb.add_celebrity('Brad', 'Pitt', 'Brad Pitt', '1976-05-30');
 select ggdb.add_reporter('Cory', 'Cory', 'Eurom', '$50000.00');
 select ggdb.add_reporter('Bob', 'Bobby', 'Brady', '$50000.00');
+select ggdb.add_reporter('JBieber', 'Justin', 'Bieber', '$50000.00');
+select ggdb.add_reporter('JTim', 'Justin', 'Timberlake', '$50000.00');
 
 /*
  * TESTING FUNCTIONS
