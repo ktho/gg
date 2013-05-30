@@ -74,7 +74,7 @@ CREATE TABLE ggdb.gossip (
 CREATE TABLE ggdb.gossip_node (
 	gossip_id	int references ggdb.gossip(id) on delete no action,
 	node_id		int references ggdb.node(id) on delete no action,
-	start_time	timestamp,
+	start_time	timestamp NOT NULL,
 	PRIMARY KEY (gossip_id, node_id)
 );
 
@@ -746,10 +746,11 @@ BEGIN
 		, TRUE
 	);
 
-	INSERT INTO ggdb.gossip_node (gossip_id, node_id) VALUES
+	INSERT INTO ggdb.gossip_node (gossip_id, node_id, start_time) VALUES
 		(
 		gossipid, 
-		nodeid
+		nodeid,
+		clock_timestamp()
 		);
 
 	INSERT INTO ggdb.reporter_gossip(reporter_id, gossip_id) VALUES
@@ -765,6 +766,84 @@ BEGIN
 		);
 END;
 $PROC$ LANGUAGE plpgsql;
+
+/*
+ * DOCUMENT:  Update Gossip
+ * @Author: Katie
+ */
+ 
+CREATE OR REPLACE FUNCTION ggdb.update_gossip (
+		p_gossipid integer
+		, p_title varchar(128) 
+		, p_body text
+		, p_isactive boolean
+)
+RETURNS void AS $PROC$
+DECLARE
+	workflowid INTEGER;
+	nodeid INTEGER;
+	gossipid INTEGER;
+	p_publishdate timestamp;
+BEGIN
+
+	SELECT ggdb.gossip.id INTO gossipid FROM ggdb.gossip WHERE ggdb.gossip.id = p_gossipid;
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'gossip guy app:  the gossip id >%< not found', p_gossipid;
+	END IF;	
+	
+	UPDATE ggdb.version v SET
+		is_current = FALSE
+		WHERE v.gossip_id = gossipid;
+		
+	INSERT INTO ggdb.version (gossip_id, title, body, creation_time, is_current) VALUES (
+		gossipid
+		, p_title
+		, p_body
+		, clock_timestamp()
+		, TRUE
+	);
+
+	IF (p_isactive) THEN
+		p_publishdate = clock_timestamp();
+	ELSE p_publishdate = NULL;
+	END IF;
+		
+	UPDATE ggdb.gossip g SET
+		publish_date = p_publishdate, is_active = p_isactive
+		WHERE g.id = gossipid;
+		
+END;
+$PROC$ LANGUAGE plpgsql;
+
+
+/*
+ * DOCUMENT:  Delete Gossip
+ * @Author: Katie
+ */
+CREATE OR REPLACE FUNCTION ggdb.delete_gossip (
+		p_gossipid integer
+)
+RETURNS void AS $PROC$
+DECLARE
+	gossipid INTEGER;
+BEGIN
+
+	SELECT ggdb.gossip.id INTO gossipid FROM ggdb.gossip WHERE ggdb.gossip.id = p_gossipid;
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'gossip guy app:  the gossip id >%< not found', p_gossipid;
+	END IF;	
+
+	DELETE FROM ggdb.gossip_node gn WHERE gn.gossip_id = gossipid;
+	DELETE FROM ggdb.version v WHERE v.gossip_id = gossipid;
+	DELETE FROM ggdb.reporter_gossip rg WHERE rg.gossip_id = gossipid;
+	DELETE FROM ggdb.celebrity_gossip cg WHERE cg.gossip_id = gossipid;
+	DELETE FROM ggdb.gossip_tag gt WHERE gt.gossip_id = gossipid;
+	DELETE FROM ggdb.gossip g WHERE g.id = gossipid;
+				
+END;
+$PROC$ LANGUAGE plpgsql;
+
+
 
 
 /*
@@ -788,7 +867,7 @@ BEGIN
 
 	SELECT ggdb.gossip.id INTO gossipid FROM ggdb.gossip WHERE ggdb.gossip.id = p_gossipid;
 	IF NOT FOUND THEN
-		RAISE EXCEPTION 'gossip guy app:  the gossip id >%< not found', p_reporter;
+		RAISE EXCEPTION 'gossip guy app:  the gossip id >%< not found', p_gossipid;
 	END IF;	
 
 	INSERT INTO ggdb.reporter_gossip(reporter_id, gossip_id) VALUES
@@ -821,7 +900,7 @@ BEGIN
 
 	SELECT ggdb.gossip.id INTO gossipid FROM ggdb.gossip WHERE ggdb.gossip.id = p_gossipid;
 	IF NOT FOUND THEN
-		RAISE EXCEPTION 'gossip guy app:  the gossip id >%< not found', p_celebritynickname;
+		RAISE EXCEPTION 'gossip guy app:  the gossip id >%< not found', p_gossipid;
 	END IF;	
 
 	INSERT INTO ggdb.celebrity_gossip(celebrity_id, gossip_id) VALUES
@@ -863,18 +942,6 @@ BEGIN
 END;
 $PROC$ LANGUAGE plpgsql;
 
-
-
-
-/*
- * DOCUMENT:  Update Gossip
- */
---CREATE OR REPLACE FUNCTION ggdb.
-
-/*
- * DOCUMENT:  Delete Gossip
- */
---CREATE OR REPLACE FUNCTION ggdb.
 
 /*
  * DOCUMENT:  Get Gossip From Reporter
@@ -1151,10 +1218,29 @@ select ggdb.add_reporter('Bob', 'Bobby', 'Brady', '$50000.00');
 select ggdb.add_reporter('JBieber', 'Justin', 'Bieber', '$50000.00');
 select ggdb.add_reporter('JTim', 'Justin', 'Timberlake', '$50000.00');
 
+
+select ggdb.update_gossip('1', 'Adam Levine hates his country', 'Adam Levine declared his hate for America on The Voice last night.', FALSE);
+select ggdb.update_gossip('1', 'Testing', 'testing update.', 'f');
+select ggdb.update_gossip('1', 'Testing', 'testing update.', 'f'::boolean);
+
+
 /*
  * TESTING FUNCTIONS
+ *
  */
+
 /*
+
+select * from ggdb.gossip;
+
+
+select ggdb.delete_gossip('1');
+
+
+select * from ggdb.gossip g
+	inner join ggdb.version v on g.id = v.gossip_id;
+select * from ggdb.version v
+
 select ggdb.update_reporter('katie', 'Bobby', 'Brady', '$5.00');
 select ggdb.add_tag_to_gossip('RPatKStew', 1);
 select ggdb.add_tag_to_gossip('Brangelina', 1);
