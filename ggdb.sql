@@ -843,7 +843,33 @@ BEGIN
 END;
 $PROC$ LANGUAGE plpgsql;
 
+/*
+ * DOCUMENT:  Get list of versions of gossip when given id
+ * @Author: Katie
+ */
+CREATE OR REPLACE FUNCTION ggdb.get_gossip_by_id (
+		p_gossipid integer
+)
+RETURNS TABLE (
+	version_id	integer,
+	version_title	varchar(128),
+	version_body	text, 
+	version_ctime	timestamp,
+	is_current	boolean
+	) AS $PROC$
+DECLARE
+	gossipid integer;
+BEGIN
 
+	SELECT ggdb.gossip.id INTO gossipid FROM ggdb.gossip WHERE ggdb.gossip.id = p_gossipid;
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'gossip guy app:  the gossip id >%< not found', p_gossipid;
+	END IF;	
+	
+	RETURN QUERY (SELECT v.id, v.title, v.body, v.creation_time, v.is_current FROM ggdb.version v WHERE v.gossip_id = gossipid ORDER BY v.is_current desc, v.creation_time desc);
+
+ END;
+$PROC$ LANGUAGE plpgsql;
 
 
 /*
@@ -1218,11 +1244,10 @@ select ggdb.add_reporter('Bob', 'Bobby', 'Brady', '$50000.00');
 select ggdb.add_reporter('JBieber', 'Justin', 'Bieber', '$50000.00');
 select ggdb.add_reporter('JTim', 'Justin', 'Timberlake', '$50000.00');
 
-
 select ggdb.update_gossip('1', 'Adam Levine hates his country', 'Adam Levine declared his hate for America on The Voice last night.', FALSE);
 select ggdb.update_gossip('1', 'Testing', 'testing update.', 'f');
-select ggdb.update_gossip('1', 'Testing', 'testing update.', 'f'::boolean);
 
+select ggdb.get_gossip_by_id ('1');
 
 /*
  * TESTING FUNCTIONS

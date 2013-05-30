@@ -83,6 +83,9 @@ function dispatchDocumentCmd($cmd, $cmd_list)
 		else if ($arg1 == "del") {
 			$status = gossip_delete($cmd_list);
 		}
+		else if ($arg1 == "list") {
+			$status = gossip_list($cmd_list);
+		}
 		else {
 			$status = cCmdStatus_NOT_FOUND; 
 
@@ -275,6 +278,27 @@ function gossip_delete($cmd_list) {
 	$result = runScalarDbQuery($sql);
 
 	$nl = "\n"; 
+	$gResult = $nl . print_r($cmd_list,true);
+	return cCmdStatus_OK; 
+}
+
+/*
+ * List all versions of gossip when given ID
+ */
+function gossip_list($cmd_list) {
+	global $gResult;
+
+	$gid = getValue("-gid",$cmd_list); 
+
+	if  ($gid == NULL) {
+		return cCmdStatus_ERROR; 
+	}
+
+	$sql = sprintf("select ggdb.get_gossip_by_id ('%s');", $gid);
+
+	$result = runSetDbQuery($sql,"basicPrintLine");
+
+	$nl = "\n". $result . "\n"; 
 	$gResult = $nl . print_r($cmd_list,true);
 	return cCmdStatus_OK; 
 }
