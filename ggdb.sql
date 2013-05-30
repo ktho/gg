@@ -1247,7 +1247,6 @@ select ggdb.add_reporter('JTim', 'Justin', 'Timberlake', '$50000.00');
 select ggdb.update_gossip('1', 'Adam Levine hates his country', 'Adam Levine declared his hate for America on The Voice last night.', FALSE);
 select ggdb.update_gossip('1', 'Testing', 'testing update.', 'f');
 
-select ggdb.get_gossip_by_id ('1');
 
 /*
  * TESTING FUNCTIONS
@@ -1260,6 +1259,7 @@ select * from ggdb.gossip;
 
 
 select ggdb.delete_gossip('1');
+select ggdb.get_gossip_by_id ('1');
 
 
 select * from ggdb.gossip g
