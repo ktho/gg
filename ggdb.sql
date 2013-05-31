@@ -606,11 +606,9 @@ CREATE OR REPLACE FUNCTION ggdb.get_reporter_by_fname (
 )
 RETURNS SETOF ggdb.Reporter AS $PROC$
 DECLARE
-	reporterid integer;
 	row2 RECORD;
 	reporterrow ggdb.Reporter%ROWTYPE;
 BEGIN
-	select r.id into reporterid from ggdb.reporter r where r.first_name = p_first;
 	
 	IF p_first NOT IN (select R.first_name from ggdb.reporter R) THEN
 		RAISE EXCEPTION 'gossip guy app:  reporter first name >%< does not exist', p_first;
