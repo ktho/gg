@@ -844,6 +844,88 @@ END;
 $PROC$ LANGUAGE plpgsql;
 
 /*
+ * DOCUMENT:  Get latest version of gossip from reporter, when given reporter_name, and active(/inactive)
+ * @Author: Katie
+ */
+CREATE OR REPLACE FUNCTION ggdb.get_gossip_by_reporter (
+		p_reporter varchar(64),
+		p_isactive boolean
+)
+RETURNS TABLE (
+	gossip_id		integer,
+	version_title		varchar(128),
+	version_body		text, 
+	version_ctime 		timestamp,
+	node_name		varchar(64)
+	) AS $PROC$
+DECLARE
+	reporterid integer;
+BEGIN
+
+	select ggdb.reporter.id into reporterid from ggdb.reporter where ggdb.reporter.username = p_reporter;
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'gossip guy app:  reporter >%< not found', p_reporter;
+	END IF;
+
+	RETURN QUERY (
+		select g.id
+			, v.title
+			, v.body
+			, v.creation_time
+			, n.name
+			from ggdb.gossip g
+			inner join ggdb.version v on v.gossip_id = g.id
+			inner join ggdb.reporter_gossip rg on rg.gossip_id = g.id
+			inner join ggdb.reporter r on r.id = rg.reporter_id
+			inner join ggdb.gossip_node gn on gn.gossip_id = g.id
+			inner join ggdb.node n on gn.node_id = n.id
+			where (g.is_active = p_isactive) and (v.is_current = 't') and (r.username = p_reporter)
+			);
+ END;
+$PROC$ LANGUAGE plpgsql;
+
+/*
+ * DOCUMENT:  Get latest version of gossip about celebrity, when given celebrity nickname, and active(/inactive)
+ * @Author: Katie
+ */
+CREATE OR REPLACE FUNCTION ggdb.get_gossip_by_celebrity (
+		p_celebrity varchar(128),
+		p_isactive boolean
+)
+RETURNS TABLE (
+	gossip_id		integer,
+	version_title		varchar(128),
+	version_body		text, 
+	version_ctime 		timestamp,
+	node_name		varchar(64)
+	) AS $PROC$
+DECLARE
+	celebrityid integer;
+BEGIN
+
+	select ggdb.celebrity.id into celebrityid from ggdb.celebrity where ggdb.celebrity.nick_name = p_celebrity;
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'gossip guy app:  celebrity >%< not found', p_celebrity;
+	END IF;
+
+	RETURN QUERY (
+		select g.id
+			, v.title
+			, v.body
+			, v.creation_time
+			, n.name
+			from ggdb.gossip g
+			inner join ggdb.version v on v.gossip_id = g.id
+			inner join ggdb.celebrity_gossip cg on cg.gossip_id = g.id
+			inner join ggdb.celebrity c on c.id = cg.celebrity_id
+			inner join ggdb.gossip_node gn on gn.gossip_id = g.id
+			inner join ggdb.node n on gn.node_id = n.id
+			where (g.is_active = p_isactive) and (v.is_current = 't') and (c.nick_name = p_celebrity)
+			);
+ END;
+$PROC$ LANGUAGE plpgsql;
+
+/*
  * DOCUMENT:  Get list of versions of gossip when given id
  * @Author: Katie
  */
@@ -867,10 +949,91 @@ BEGIN
 	END IF;	
 	
 	RETURN QUERY (SELECT v.id, v.title, v.body, v.creation_time, v.is_current FROM ggdb.version v WHERE v.gossip_id = gossipid ORDER BY v.is_current desc, v.creation_time desc);
-
  END;
 $PROC$ LANGUAGE plpgsql;
 
+/*
+ * DOCUMENT:  Get list of status of gossip
+ * @Author: Katie
+ */
+CREATE OR REPLACE FUNCTION ggdb.get_gossip_status (
+		p_gossipid integer
+)
+RETURNS TABLE (
+	node_shortname  varchar(3),
+	node_name 	varchar(64),
+	node_type	ggdb.nodetype,
+	start_time	timestamp
+	) AS $PROC$
+DECLARE
+	gossipid integer;
+BEGIN
+
+	SELECT ggdb.gossip.id INTO gossipid FROM ggdb.gossip WHERE ggdb.gossip.id = p_gossipid;
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'gossip guy app:  the gossip id >%< not found', p_gossipid;
+	END IF;	
+	
+	RETURN QUERY (
+		select n.shortname, n.name, n.nodetype, gn.start_time
+			from ggdb.gossip g
+			inner join ggdb.gossip_node gn on gn.gossip_id = g.id
+			inner join ggdb.node n on gn.node_id = n.id
+			where g.id = gossipid
+	);
+ END;
+$PROC$ LANGUAGE plpgsql;
+
+/*
+ * DOCUMENT:  change gossip status.  Next status must be next step in workflow.
+ * @Author: Katie
+ */
+CREATE OR REPLACE FUNCTION ggdb.change_gossip_status (
+		p_gossipid INTEGER
+		,  p_nodeshortname varchar(3)		
+		,  p_isactive boolean	
+)
+RETURNS void AS $PROC$
+DECLARE
+	gossipid INTEGER;
+	oldnodeid INTEGER;
+	newnodeid INTEGER;
+BEGIN
+	SELECT g.id, n.id INTO gossipid, oldnodeid 
+		FROM ggdb.gossip g 
+		INNER JOIN ggdb.gossip_node gn ON gn.gossip_id = g.id
+		INNER JOIN ggdb.node n ON gn.node_id = n.id
+		WHERE g.id = p_gossipid;
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'gossip guy app:  the gossip id >%< not found', p_gossipid;
+	END IF;	
+
+	SELECT n.id INTO newnodeid
+		FROM ggdb.node n
+		WHERE n.shortname = p_nodeshortname;
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'gossip guy app:  the node >%< not found', p_nodeshortname;
+	END IF;	
+
+	IF newnodeid NOT IN (select distinct tonode_id from ggdb.link l where l.fromnode_id = oldnodeid) THEN
+		RAISE EXCEPTION 'gossip guy app:  the node >%< is not the next step in workflow', p_nodeshortname;
+	END IF;	
+
+	INSERT INTO ggdb.gossip_node (gossip_id, node_id, start_time) VALUES
+		(
+		gossipid
+		, newnodeid
+		, clock_timestamp()
+		);
+
+	IF p_isactive THEN
+		UPDATE ggdb.gossip g SET
+			publish_date = clock_timestamp(), is_active = p_isactive
+			WHERE g.id = gossipid;
+	END IF;
+
+END;
+$PROC$ LANGUAGE plpgsql;
 
 /*
  * DOCUMENT:  Add Reporter To Gossip
@@ -967,17 +1130,6 @@ BEGIN
 		);
 END;
 $PROC$ LANGUAGE plpgsql;
-
-
-/*
- * DOCUMENT:  Get Gossip From Reporter
- */
---CREATE OR REPLACE FUNCTION ggdb.
-
-/*
- * DOCUMENT:  Get Gossip About
- */
---CREATE OR REPLACE FUNCTION ggdb.
 
 
 
@@ -1247,6 +1399,13 @@ select ggdb.add_reporter('JTim', 'Justin', 'Timberlake', '$50000.00');
 select ggdb.update_gossip('1', 'Adam Levine hates his country', 'Adam Levine declared his hate for America on The Voice last night.', FALSE);
 select ggdb.update_gossip('1', 'Testing', 'testing update.', 'f');
 
+select ggdb.get_gossip_by_reporter ('katie', 'f');
+
+select ggdb.get_gossip_by_celebrity ('RPat', 'f');
+
+select ggdb.get_gossip_status ('1');
+
+
 
 /*
  * TESTING FUNCTIONS
@@ -1254,6 +1413,8 @@ select ggdb.update_gossip('1', 'Testing', 'testing update.', 'f');
  */
 
 /*
+select ggdb.change_gossip_status('1', 'pub', 'true');
+
 
 select * from ggdb.gossip;
 
