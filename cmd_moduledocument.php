@@ -39,6 +39,9 @@ function dispatchDocumentCmd($cmd, $cmd_list)
 		elseif ($arg1 == "del") {
 			$status = reporter_del($cmd_list);
 		}
+		elseif ($arg1 == "get") {
+			$status = reporter_get($cmd_list);
+		}
 		else {
 			$status = cCmdStatus_NOT_FOUND; 
 		}
@@ -57,6 +60,9 @@ function dispatchDocumentCmd($cmd, $cmd_list)
 		}
 		elseif ($arg1 == "update") {
 		$status = celebrity_update($cmd_list);
+		}
+		elseif ($arg1 == "get") {
+		$status = celebrity_get($cmd_list);
 		}
 		else {
 			$status = cCmdStatus_NOT_FOUND; 
@@ -153,6 +159,46 @@ function reporter_update($cmd_list) {
 
 	$t = "\n"; 
 	$gResult = $t . print_r($cmd_list,true);
+	return cCmdStatus_OK; 
+}
+
+/*
+ * Get reporter(s) on different criteria
+ * Author: Xing 6/1/13 10:25am
+ */
+function reporter_get($cmd_list) {
+	global $gResult;
+
+	$id = getValue("-id",$cmd_list);
+	$f = getValue("-f",$cmd_list); 
+	$l = getValue("-l",$cmd_list); 
+	$c = getValue("-c",$cmd_list); 
+
+	if (($id == NULL) && ($f == NULL)&& ($l == NULL)&& ($c == NULL)) {
+		return cCmdStatus_ERROR; 
+	}
+	else if (($id != NULL) && ($f == NULL) && ($l == NULL) && ($c == NULL)) {
+		$sql = sprintf("select * from ggdb.get_reporter_by_id ('%s');", $id);
+		$result = runSetDbQuery($sql,"basicPrintLine");
+	}
+	else if (($id == NULL) && ($f != NULL) && ($l == NULL) && ($c == NULL)) {
+		$sql = sprintf("select * from ggdb.get_reporter_by_fname ('%s');", $f);
+		$result = runSetDbQuery($sql,"basicPrintLine");
+	}
+	else if (($id == NULL) && ($f == NULL) && ($l != NULL) && ($c == NULL)) {
+		$sql = sprintf("select * from ggdb.get_reporter_by_lname ('%s');", $l);
+		$result = runSetDbQuery($sql,"basicPrintLine");
+	}
+	else if (($id == NULL) && ($f != NULL) && ($l == NULL) && ($c != NULL)) {
+		$sql = sprintf("select * from ggdb.get_reporter_by_comm ('%f');", $c);
+		$result = runSetDbQuery($sql,"basicPrintLine");
+	}
+	else {
+			$status = cCmdStatus_ERROR; 
+		}
+
+	$nl = "\n". $result . "\n"; 
+	$gResult = $nl . print_r($cmd_list,true);
 	return cCmdStatus_OK; 
 }
 
