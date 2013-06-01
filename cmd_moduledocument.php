@@ -89,6 +89,12 @@ function dispatchDocumentCmd($cmd, $cmd_list)
 		else if ($arg1 == "listby") {
 			$status = gossip_listby($cmd_list);
 		}
+		else if ($arg1 == "getstatus") {
+			$status = gossip_getstatus($cmd_list);
+		}
+		else if ($arg1 == "changestatus") {
+			$status = gossip_changestatus($cmd_list);
+		}
 		else {
 			$status = cCmdStatus_NOT_FOUND; 
 
@@ -396,5 +402,57 @@ function gossip_add($cmd_list) {
 	}
 	return cCmdStatus_OK; 
 }
+
+
+/*
+ * List status of gossip
+ */
+function gossip_getstatus($cmd_list) {
+	global $gResult;
+
+	$gid = getValue("-gid",$cmd_list); 
+
+	if  ($gid == NULL) {
+		return cCmdStatus_ERROR; 
+	}
+
+	$sql = sprintf("select ggdb.get_gossip_status ('%s');", $gid);
+
+	$result = runSetDbQuery($sql,"basicPrintLine");
+
+	$nl = "\n". $result . "\n"; 
+	$gResult = $nl . print_r($cmd_list,true);
+	return cCmdStatus_OK; 
+}
+
+/*
+ * change status of gossip
+ */
+function gossip_changestatus($cmd_list) {
+	global $gResult;
+
+	$gid = getValue("-gid",$cmd_list); 
+	$n = getValue("-n",$cmd_list); 
+	$ac = getValue("-ac",$cmd_list); 
+
+	if  (($gid == NULL) || ($n == null) || ($ac == null)){
+		return cCmdStatus_ERROR; 
+	}
+
+	if ((strtolower($ac) == "true") || (strtolower($ac) == "t")) {
+		$act = "t";
+	} else {
+		$act = "f";
+	}
+
+	$sql = sprintf("select ggdb.change_gossip_status ('%s', '%s', '%s');", $gid, $n, $act);
+
+	$result = runScalarDbQuery($sql);
+
+	$nl = "\n"; 
+	$gResult = $nl . print_r($cmd_list,true);
+	return cCmdStatus_OK; 
+}
+
 
 ?>
