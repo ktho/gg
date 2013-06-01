@@ -694,7 +694,6 @@ $PROC$ LANGUAGE plpgsql;
  * DOCUMENT:  Create Gossip
  * @Author: Katie
  */
- 
 CREATE OR REPLACE FUNCTION ggdb.create_gossip (
 		p_workflow varchar(64)
 		, p_nodeshortname varchar(3)
@@ -769,7 +768,6 @@ $PROC$ LANGUAGE plpgsql;
  * DOCUMENT:  Update Gossip
  * @Author: Katie
  */
- 
 CREATE OR REPLACE FUNCTION ggdb.update_gossip (
 		p_gossipid integer
 		, p_title varchar(128) 
@@ -842,7 +840,7 @@ END;
 $PROC$ LANGUAGE plpgsql;
 
 /*
- * DOCUMENT:  Get latest version of gossip from reporter, when given reporter_name, and active(/inactive)
+ * DOCUMENT:  Get latest version of gossip from reporter, when given reporter_name, and active/inactive value
  * @Author: Katie
  */
 CREATE OR REPLACE FUNCTION ggdb.get_gossip_by_reporter (
@@ -883,7 +881,7 @@ BEGIN
 $PROC$ LANGUAGE plpgsql;
 
 /*
- * DOCUMENT:  Get latest version of gossip about celebrity, when given celebrity nickname, and active(/inactive)
+ * DOCUMENT:  Get latest version of gossip about celebrity, when given celebrity nickname, and active/inactive value
  * @Author: Katie
  */
 CREATE OR REPLACE FUNCTION ggdb.get_gossip_by_celebrity (
@@ -922,6 +920,90 @@ BEGIN
 			);
  END;
 $PROC$ LANGUAGE plpgsql;
+
+/*
+ * DOCUMENT:  Get latest version of gossip about tag, when given tag name, and active/inactive value
+ * @Author: Katie
+ */
+CREATE OR REPLACE FUNCTION ggdb.get_gossip_by_tag (
+		p_tag varchar(64),
+		p_isactive boolean
+)
+RETURNS TABLE (
+	gossip_id		integer,
+	version_title		varchar(128),
+	version_body		text, 
+	version_ctime 		timestamp,
+	node_name		varchar(64)
+	) AS $PROC$
+DECLARE
+	tagid integer;
+BEGIN
+
+	select ggdb.tag.id into tagid from ggdb.tag where ggdb.tag.name = p_tag;
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'gossip guy app:  tag >%< not found', p_tag;
+	END IF;
+
+	RETURN QUERY (
+		select g.id
+			, v.title
+			, v.body
+			, v.creation_time
+			, n.name
+			from ggdb.gossip g
+			inner join ggdb.version v on v.gossip_id = g.id
+			inner join ggdb.gossip_tag gt on gt.gossip_id = g.id
+			inner join ggdb.tag t on t.id = gt.tag_id
+			inner join ggdb.gossip_node gn on gn.gossip_id = g.id
+			inner join ggdb.node n on gn.node_id = n.id
+			where (g.is_active = p_isactive) and (v.is_current = 't') and (t.name = p_tag)
+			);
+ END;
+$PROC$ LANGUAGE plpgsql;
+
+
+/*
+ * DOCUMENT:  Get latest version of gossip when given bundle name, and active/inactive value; 
+ * @Author: Katie
+ */
+CREATE OR REPLACE FUNCTION ggdb.get_gossip_by_bundle (
+		p_bundle varchar(64),
+		p_isactive boolean
+)
+RETURNS TABLE (
+	gossip_id		integer,
+	version_title		varchar(128),
+	version_body		text, 
+	version_ctime 		timestamp,
+	node_name		varchar(64)
+	) AS $PROC$
+DECLARE
+	bundleid integer;
+BEGIN
+
+	select ggdb.bundle.id into bundleid from ggdb.bundle where ggdb.bundle.name = p_bundle;
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'gossip guy app:  bundle >%< not found', p_bundle;
+	END IF;
+
+	RETURN QUERY (
+		select distinct g.id
+			, v.title
+			, v.body
+			, v.creation_time
+			, n.name
+			from ggdb.gossip g
+			inner join ggdb.version v on v.gossip_id = g.id
+			inner join ggdb.gossip_tag gt on gt.gossip_id = g.id
+			inner join ggdb.tag t on t.id = gt.tag_id
+			inner join ggdb.gossip_node gn on gn.gossip_id = g.id
+			inner join ggdb.node n on gn.node_id = n.id
+			where (g.is_active = p_isactive) and (v.is_current = 't') and (t.bundle_id = bundleid)
+			);
+ END;
+$PROC$ LANGUAGE plpgsql;
+
 
 /*
  * DOCUMENT:  Get list of versions of gossip when given id
@@ -1386,6 +1468,8 @@ INSERT INTO ggdb.tag (bundle_id, name) VALUES
 	(1, 'RPatKStew');
 INSERT INTO ggdb.tag (bundle_id, name) VALUES
 	(1, 'Brangelina');
+select ggdb.add_tag_to_gossip('RPatKStew', 1);
+select ggdb.add_tag_to_gossip('Brangelina', 1);
 select ggdb.add_celebrity('Kim', 'Kardashian', NULL, '1980-05-30');
 select ggdb.add_celebrity('Cee Lo', 'Green', 'Cee Lo', '1970-05-30');
 select ggdb.add_celebrity('Brad', 'Pitt', 'Brad Pitt', '1976-05-30');
@@ -1397,11 +1481,18 @@ select ggdb.add_reporter('JTim', 'Justin', 'Timberlake', '$50000.00');
 select ggdb.update_gossip('1', 'Adam Levine hates his country', 'Adam Levine declared his hate for America on The Voice last night.', FALSE);
 select ggdb.update_gossip('1', 'Testing', 'testing update.', 'f');
 
+
+select ggdb.get_gossip_status ('1');
+
 select ggdb.get_gossip_by_reporter ('katie', 'f');
 
 select ggdb.get_gossip_by_celebrity ('RPat', 'f');
 
-select ggdb.get_gossip_status ('1');
+select ggdb.get_gossip_by_tag ('RPatKStew', 'f');
+
+select ggdb.get_gossip_by_tag ('Brangelina', 'f');
+
+select ggdb.get_gossip_by_bundle ('relationship', 'f');
 
 
 

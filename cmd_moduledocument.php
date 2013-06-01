@@ -86,6 +86,9 @@ function dispatchDocumentCmd($cmd, $cmd_list)
 		else if ($arg1 == "list") {
 			$status = gossip_list($cmd_list);
 		}
+		else if ($arg1 == "listby") {
+			$status = gossip_listby($cmd_list);
+		}
 		else {
 			$status = cCmdStatus_NOT_FOUND; 
 
@@ -191,7 +194,6 @@ function celebrity_update($cmd_list) {
 		return cCmdStatus_ERROR; 
 	}
 
-
 	$sql = sprintf("select ggdb.update_celebrity ('%s', '%s', '%s', '%s');", $f, $l, $n, $b);
 
 	$result = runScalarDbQuery($sql);
@@ -246,7 +248,7 @@ function gossip_update($cmd_list) {
 		return cCmdStatus_ERROR; 
 	}
 
-	if (ctype_lower($ac)=== "true") {
+	if ((strtolower($ac) == "true") || (strtolower($ac) == "t")) {
 		$act = "t";
 	} else {
 		$act = "f";
@@ -303,6 +305,55 @@ function gossip_list($cmd_list) {
 	return cCmdStatus_OK; 
 }
 
+/*
+ * List latest version of gossip by reporter, celebrity, tag, or bundle.  
+ */
+function gossip_listby($cmd_list) {
+	global $gResult;
+
+	$r = getValue("-r",$cmd_list);
+	$c = getValue("-c",$cmd_list);	
+	$t = getValue("-t",$cmd_list); 
+	$b = getValue("-b",$cmd_list); 
+	$ac = getValue("-ac",$cmd_list); 
+
+	if (($ac == null)
+			|| (($r == null) 
+					&& ($c == null)
+					&& ($t == null)
+					&& ($b == null))
+		)  {
+		return cCmdStatus_Error;
+	}
+
+	if ((strtolower($ac) == "true") || (strtolower($ac) == "t")) {
+		$act = "t";
+	} else {
+		$act = "f";
+	}
+
+	if ($r != null) {
+	$sql = sprintf("select ggdb.get_gossip_by_reporter ('%s', '%s');", $r, $act);
+	}
+
+	if ($c != null) {
+	$sql = sprintf("select ggdb.get_gossip_by_celebrity ('%s', '%s');", $c, $act);
+	}
+
+	if ($t != null) {
+	$sql = sprintf("select ggdb.get_gossip_by_tag ('%s', '%s');", $t, $act);
+	}
+
+	if ($b != null) {
+	$sql = sprintf("select ggdb.get_gossip_by_bundle ('%s', '%s');", $b, $act);
+	}
+
+	$result = runSetDbQuery($sql,"basicPrintLine");
+	$nl = "\n". $result . "\n"; 
+	$gResult = $nl . print_r($cmd_list,true);
+	return cCmdStatus_OK; 
+}
+
 
 /*
  * Add reporter, celebrity, and tag to gossip
@@ -343,7 +394,6 @@ function gossip_add($cmd_list) {
 			$gResult = $t . print_r($cmd_list,true);
 		}
 	}
-
 	return cCmdStatus_OK; 
 }
 
