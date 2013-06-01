@@ -574,23 +574,31 @@ $PROC$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION ggdb.get_reporter_by_id (
 		p_username varchar(64)
 )
-RETURNS TABLE (
-	id     		integer,
-	username	varchar(64),	
-	first_name	varchar(64),
-	last_name	varchar(64),
-	commission	money	) AS $PROC$
+RETURNS SETOF ggdb.Reporter AS $PROC$
 DECLARE
-	row1 RECORD;
-
+	reporterid varchar(64);
+	row2 RECORD;
+	reporterrow ggdb.Reporter%ROWTYPE;
 BEGIN
-	select * into row1 from ggdb.reporter r where r.username = p_username;
+	select r.username into reporterid from ggdb.reporter r where r.username = p_username;
 	
 	IF p_username NOT IN (select R.username from ggdb.reporter R) THEN
-		RAISE EXCEPTION 'gossip guy app:  reporter id >%< does not exist', p_username;
+		RAISE EXCEPTION 'gossip guy app:  reporter  username >%< does not exist', p_username;
 	END IF;
 	
-	RETURN QUERY (SELECT * FROM ggdb.reporter R WHERE R.username = row1.username);
+	FOR row2 IN SELECT * from ggdb.reporter R where r.username = p_username
+	LOOP
+
+		reporterrow.id := row2.id;
+		reporterrow.username := row2.username;
+		reporterrow.first_name := row2.first_name;
+		reporterrow.last_name := row2.last_name;
+		reporterrow.commission := row2.commission;
+
+		RETURN NEXT reporterrow;
+
+	END LOOP;
+	RETURN;
 	/* Call Revision History Funciton Here
 	*/ 
  END;
@@ -764,25 +772,30 @@ $PROC$ LANGUAGE plpgsql;
  * @Author: Xing
  */
 CREATE OR REPLACE FUNCTION ggdb.get_celebrity_by_id (
-		p_nickname varchar(64)
+		p_nick varchar(64)
 )
-RETURNS TABLE (
-	id     		integer,	
-	first_name	varchar(64),
-	last_name	varchar(64),
-	nick_name   varchar(64),
-	birthdate	date	) AS $PROC$
+RETURNS SETOF ggdb.celebrity AS $PROC$
 DECLARE
-	row1 RECORD;
-
+	row2 RECORD;
+	celebrityrow ggdb.celebrity%ROWTYPE;
 BEGIN
-	select * into row1 from ggdb.Celebrity c where c.nick_name = p_nickname;
 	
-	IF p_nickname NOT IN (select c.nickname from ggdb.celebrity c) THEN
-		RAISE EXCEPTION 'gossip guy app:  celebrity nickname >%< does not exist', p_nickname;
+	IF p_nick NOT IN (select c.nick_name from ggdb.celebrity c) THEN
+		RAISE EXCEPTION 'gossip guy app:  reporter nick_name >%< does not exist', p_nick;
 	END IF;
 	
-	RETURN QUERY (SELECT * FROM ggdb.celebrity R WHERE R.nick_name = row1.nick_name);
+	FOR row2 IN SELECT * from ggdb.celebrity c where c.nick_name = p_nick
+	LOOP
+
+		celebrityrow.id := row2.id;
+		celebrityrow.first_name := row2.first_name;
+		celebrityrow.last_name := row2.last_name;
+		celebrityrow.nick_name := row2.nick_name;
+		celebrityrow.birthdate := row2.birthdate;
+		RETURN NEXT celebrityrow;
+
+	END LOOP;
+	RETURN;
 	/* Call Revision History Funciton Here
 	*/ 
  END;

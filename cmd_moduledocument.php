@@ -256,6 +256,47 @@ function celebrity_update($cmd_list) {
 }
 
 /*
+ * Get reporter(s) on different criteria
+ * Author: Xing 6/1/13 10:25am
+ */
+function celebrity_get($cmd_list) {
+	global $gResult;
+	$f = getValue("-f",$cmd_list); 
+	$l = getValue("-l",$cmd_list);
+	$n = getValue("-id",$cmd_list); 
+	$b = getValue("-b",$cmd_list); 
+
+	if (($n == NULL) && ($f == NULL)&& ($l == NULL)&& ($b == NULL)) {
+		return cCmdStatus_ERROR; 
+	}
+	else if (($n != NULL) && ($f == NULL) && ($l == NULL) && ($b == NULL)) {
+		$sql = sprintf("select * from ggdb.get_celebrity_by_id ('%s');", $n);
+		$result = runSetDbQuery($sql,"basicPrintLine");
+	}
+	else if (($n == NULL) && ($f != NULL) && ($l == NULL) && ($b == NULL)) {
+		$sql = sprintf("select * from ggdb.get_celebrity_by_fname ('%s');", $f);
+		$result = runSetDbQuery($sql,"basicPrintLine");
+	}
+	else if (($n == NULL) && ($f == NULL) && ($l != NULL) && ($b == NULL)) {
+		$sql = sprintf("select * from ggdb.get_celebrity_by_lname ('%s');", $l);
+		$result = runSetDbQuery($sql,"basicPrintLine");
+	}
+	else if (($n == NULL) && ($f != NULL) && ($l == NULL) && ($b != NULL)) {
+		$sql = sprintf("select * from ggdb.get_celebrity_by_bday ('%s');", $b);
+		$result = runSetDbQuery($sql,"basicPrintLine");
+	}
+	else {
+			$status = cCmdStatus_ERROR; 
+		}
+
+	$nl = "\n". $result . "\n"; 
+	$gResult = $nl . print_r($cmd_list,true);
+	return cCmdStatus_OK; 
+}
+
+
+
+/*
  * Creates gossip
  */
 function gossip_create($cmd_list) {
