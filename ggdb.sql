@@ -1,4 +1,4 @@
-﻿/*
+/*
  * A database for gossip guy
  */
 
@@ -633,7 +633,75 @@ BEGIN
  END;
 $PROC$ LANGUAGE plpgsql;
 
+/*
+ * DOCUMENT:  Get list of reporters based off of last name
+ * @Author: Xing
+ */
+CREATE OR REPLACE FUNCTION ggdb.get_reporter_by_lname (
+		p_last varchar(64)
+)
+RETURNS SETOF ggdb.Reporter AS $PROC$
+DECLARE
+	row2 RECORD;
+	reporterrow ggdb.Reporter%ROWTYPE;
+BEGIN
+	
+	IF p_last NOT IN (select R.last_name from ggdb.reporter R) THEN
+		RAISE EXCEPTION 'gossip guy app:  reporter last name >%< does not exist', p_last;
+	END IF;
+	
+	FOR row2 IN SELECT * from ggdb.reporter R where r.last_name = p_last
+	LOOP
 
+		reporterrow.id := row2.id;
+		reporterrow.username := row2.username;
+		reporterrow.first_name := row2.first_name;
+		reporterrow.last_name := row2.last_name;
+		reporterrow.commission := row2.commission;
+
+		RETURN NEXT reporterrow;
+
+	END LOOP;
+	RETURN;
+	/* Call Revision History Funciton Here
+	*/ 
+ END;
+$PROC$ LANGUAGE plpgsql;
+
+/*
+ * DOCUMENT:  Get list of reporters based off of commission
+ * @Author: Xing
+ */
+CREATE OR REPLACE FUNCTION ggdb.get_reporter_by_comm (
+		p_comm money
+)
+RETURNS SETOF ggdb.Reporter AS $PROC$
+DECLARE
+	row2 RECORD;
+	reporterrow ggdb.Reporter%ROWTYPE;
+BEGIN
+	
+	IF p_comm NOT IN (select R.commission from ggdb.reporter R) THEN
+		RAISE EXCEPTION 'gossip guy app:  reporter commission >%< does not exist', p_comm;
+	END IF;
+	
+	FOR row2 IN SELECT * from ggdb.reporter R where r.commission = p_comm
+	LOOP
+
+		reporterrow.id := row2.id;
+		reporterrow.username := row2.username;
+		reporterrow.first_name := row2.first_name;
+		reporterrow.last_name := row2.last_name;
+		reporterrow.commission := row2.commission;
+
+		RETURN NEXT reporterrow;
+
+	END LOOP;
+	RETURN;
+	/* Call Revision History Funciton Here
+	*/ 
+ END;
+$PROC$ LANGUAGE plpgsql;
 
 /*
  * DOCUMENT:  Add Celebrity
@@ -690,6 +758,139 @@ BEGIN
 	*/ 
 END;
 $PROC$ LANGUAGE plpgsql;
+
+/*
+ * DOCUMENT:  Get list of celebrities based off of nickname
+ * @Author: Xing
+ */
+CREATE OR REPLACE FUNCTION ggdb.get_celebrity_by_id (
+		p_nickname varchar(64)
+)
+RETURNS TABLE (
+	id     		integer,	
+	first_name	varchar(64),
+	last_name	varchar(64),
+	nick_name   varchar(64),
+	birthdate	date	) AS $PROC$
+DECLARE
+	row1 RECORD;
+
+BEGIN
+	select * into row1 from ggdb.Celebrity c where c.nick_name = p_nickname;
+	
+	IF p_nickname NOT IN (select c.nickname from ggdb.celebrity c) THEN
+		RAISE EXCEPTION 'gossip guy app:  celebrity nickname >%< does not exist', p_nickname;
+	END IF;
+	
+	RETURN QUERY (SELECT * FROM ggdb.celebrity R WHERE R.nick_name = row1.nick_name);
+	/* Call Revision History Funciton Here
+	*/ 
+ END;
+$PROC$ LANGUAGE plpgsql;
+
+/*
+ * DOCUMENT:  Get list of celebrities based off of first name
+ * @Author: Xing
+ */
+CREATE OR REPLACE FUNCTION ggdb.get_celebrity_by_fname (
+		p_first varchar(64)
+)
+RETURNS SETOF ggdb.celebrity AS $PROC$
+DECLARE
+	row2 RECORD;
+	celebrityrow ggdb.celebrity%ROWTYPE;
+BEGIN
+	
+	IF p_first NOT IN (select c.first_name from ggdb.celebrity c) THEN
+		RAISE EXCEPTION 'gossip guy app:  reporter first name >%< does not exist', p_first;
+	END IF;
+	
+	FOR row2 IN SELECT * from ggdb.celebrity c where c.first_name = p_first
+	LOOP
+
+		celebrityrow.id := row2.id;
+		celebrityrow.first_name := row2.first_name;
+		celebrityrow.last_name := row2.last_name;
+		celebrityrow.nick_name := row2.nick_name;
+		celebrityrow.birthdate := row2.birthdate;
+		RETURN NEXT celebrityrow;
+
+	END LOOP;
+	RETURN;
+	/* Call Revision History Funciton Here
+	*/ 
+ END;
+$PROC$ LANGUAGE plpgsql;
+
+/*
+ * DOCUMENT:  Get list of celebrities based off of last name
+ * @Author: Xing
+ */
+CREATE OR REPLACE FUNCTION ggdb.get_celebrity_by_lname (
+		p_last varchar(64)
+)
+RETURNS SETOF ggdb.celebrity AS $PROC$
+DECLARE
+	row2 RECORD;
+	celebrityrow ggdb.celebrity%ROWTYPE;
+BEGIN
+	
+	IF p_last NOT IN (select c.last_name from ggdb.celebrity c) THEN
+		RAISE EXCEPTION 'gossip guy app:  reporter last name >%< does not exist', p_last;
+	END IF;
+	
+	FOR row2 IN SELECT * from ggdb.celebrity c where c.last_name = p_last
+	LOOP
+
+		celebrityrow.id := row2.id;
+		celebrityrow.first_name := row2.first_name;
+		celebrityrow.last_name := row2.last_name;
+		celebrityrow.nick_name := row2.nick_name;
+		celebrityrow.birthdate := row2.birthdate;
+		RETURN NEXT celebrityrow;
+
+	END LOOP;
+	RETURN;
+	/* Call Revision History Funciton Here
+	*/ 
+ END;
+$PROC$ LANGUAGE plpgsql;
+
+/*
+ * DOCUMENT:  Get list of reporters based off of commission
+ * @Author: Xing
+ */
+CREATE OR REPLACE FUNCTION ggdb.get_celebrity_by_bday (
+		p_bday date
+)
+RETURNS SETOF ggdb.celebrity AS $PROC$
+DECLARE
+	row2 RECORD;
+	celebrityrow ggdb.celebrity%ROWTYPE;
+BEGIN
+	
+	IF p_bday NOT IN (select c.birthdate from ggdb.celebrity c) THEN
+		RAISE EXCEPTION 'gossip guy app:  reporter brithdate >%< does not exist', p_bday;
+	END IF;
+	
+	FOR row2 IN SELECT * from ggdb.celebrity c where c.birthdate = p_bday
+	LOOP
+
+		celebrityrow.id := row2.id;
+		celebrityrow.first_name := row2.first_name;
+		celebrityrow.last_name := row2.last_name;
+		celebrityrow.nick_name := row2.nick_name;
+		celebrityrow.birthdate := row2.birthdate;
+
+		RETURN NEXT celebrityrow;
+
+	END LOOP;
+	RETURN;
+	/* Call Revision History Funciton Here
+	*/ 
+ END;
+$PROC$ LANGUAGE plpgsql;
+
 
 /*
  * DOCUMENT:  Create Gossip
