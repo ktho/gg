@@ -1709,7 +1709,18 @@ select ggdb.get_gossip_by_tag ('Brangelina', 'f');
 
 select ggdb.get_gossip_by_bundle ('relationship', 'f');
 
+/*
+ *  Import data
+ */
+COPY ggdb.celebrity (nick_name, first_name, last_name, birthdate) FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/celebNames.txt';
 
+COPY ggdb.reporter (username, first_name, last_name, commission)FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/reporterNames.txt';
+
+COPY ggdb.gossip (publish_date) FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/gossipTable.txt';
+
+COPY ggdb.gossip_node (gossip_id, node_id, start_time) FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/gossipNode.txt';
+
+COPY ggdb.version (gossip_id, title, body) FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/versionGossip.txt';
 
 /*
  * TESTING FUNCTIONS

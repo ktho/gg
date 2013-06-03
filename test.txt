@@ -1,12 +1,14 @@
 ﻿// add username and email
 $ git config --global user.name 'Your Name'
 $ git config --global user.email you@somedomain.com
+
 // set up remote
 $ mkdir project.git
 $ cd project.git
 $ git init
-$ git remote add -f -t master -m master origin git://example.com/git.git/
+$ git remote add -f -t master -m master origin https://github.com/username/yourRepo.git
 $ git merge origin
+
 //add files to be committed
 $ git add hello.rb 
 $ git status -s
@@ -14,7 +16,8 @@ M  hello.rb
 $ git commit -m 'my hola mundo changes'
 [master 68aa034] my hola mundo changes
  1 files changed, 2 insertions(+), 1 deletions(-)
-// remove files from being committed
+
+ // remove files from being committed
 $ git status -s
  M README
  M hello.rb
@@ -28,5 +31,10 @@ M hello.rb
 $ git status -s
 M  README
  M hello.r
+
  //push commited files
 $ git push origin
+
+//force pull overwrite
+git fetch --all
+git reset --hard origin/master
