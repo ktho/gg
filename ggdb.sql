@@ -1477,7 +1477,6 @@ BEGIN
 END;
 $PROC$ LANGUAGE plpgsql;
 
-
 /*
  * TAGGING:  Update Tag
  * @Author: cte13
@@ -1656,8 +1655,37 @@ $PROC$ LANGUAGE plpgsql;
  ********************************************************************************
  */
 
+ /*
+ * UTILITY:  records major system changes into revision history
+ * @Author: katie
+ */
+CREATE OR REPLACE FUNCTION ggdb.update_revision_history (
+		p_message		text
+)
+RETURNS void AS $PROC$
+BEGIN
+	INSERT INTO ggdb.revision_history (message) VALUES
+		(clock_timestamp(), p_message);
+END;
+$PROC$ LANGUAGE plpgsql;
 
-
+ /*
+ * UTILITY:  returns revision history after the given timestamp
+ * @Author: katie
+ */
+CREATE OR REPLACE FUNCTION ggdb.get_revision_history (
+	p_timestamp	timestamp
+)
+RETURNS TABLE (
+	thetime  		timestamp,
+	message		text 
+) AS $PROC$
+DECLARE
+BEGIN
+	
+	RETURN QUERY (select rh.time, rh.message from ggdb.revision_history rh where rh.time > p_timestamp);
+END;
+$PROC$ LANGUAGE plpgsql;
 
 /*
  ********************************************************************************
@@ -1767,6 +1795,9 @@ select * from ggdb.celebrity_gossip rg
 		
 >>>>>>> parent of 6c1e62e... Tested add_celebrity and update_celebrity
 
+select * from ggdb.version v;
+
+select * from ggdb.version v order by v.creation_time limit 10
 select * from ggdb.gossip_node;
 
 select ggdb.get_workflows();
