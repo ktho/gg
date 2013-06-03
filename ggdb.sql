@@ -1439,41 +1439,25 @@ $PROC$ LANGUAGE plpgsql;
  * @Author: cte13
  */
 CREATE OR REPLACE FUNCTION ggdb.create_tag (
-	p_title			varchar(128),
-	p_bname			int,
+	p_bname			varchar(64),
 	p_tname			varchar(64)
 )
 RETURNS void AS $PROC$
 DECLARE
 	bid		INTEGER;
-	gid		INTEGER;
-	tid		INTEGER;
 BEGIN
-	SELECT G.id INTO gid FROM ggdb.gossip G WHERE G.title = p_title;
-	IF NOT FOUND THEN
-		RAISE EXCEPTION 'gossip guy app:  title >%< not found', p_title;
-	END IF;
-	
-	IF p_tname IN (select T.name from ggdb.tag T) THEN
-		RAISE EXCEPTION 'gossip guy app:  tag >%< already exists', p_name;
-	END IF;
-	
 	SELECT B.id INTO bid FROM ggdb.bundle B WHERE B.name = p_bname;
 	IF NOT FOUND THEN
 		RAISE EXCEPTION 'gossip guy app:  bundle >%< not found', p_bname;
 		-- Possible to create a bundle if it does not exist... better option?
 	END IF;
-	
-	INSERT INTO ggdb.tag (bundle_id, name) VALUES
-		(bid, p_name);
 		
-	SELECT T.id INTO tid FROM ggdb.tag T WHERE T.name = p_tname;
-	IF NOT FOUND THEN
-		RAISE EXCEPTION 'gossip guy app: error with tag >%< not found', p_title;
+	IF p_tname IN (select T.name from ggdb.tag T) THEN
+		RAISE EXCEPTION 'gossip guy app:  tag >%< already exists', p_tname;
 	END IF;
-		
-	INSERT INTO ggdb.gossip_tag (gossip_id, tag_id) VALUES
-		(gid, tid);
+
+	INSERT INTO ggdb.tag (bundle_id, name) VALUES
+		(bid, p_tname);
 END;
 $PROC$ LANGUAGE plpgsql;
 
@@ -1677,12 +1661,9 @@ select ggdb.create_gossip('def', 'dra', 'katie', 'kstew', 'Kstew is in another s
 select ggdb.add_reporter_to_gossip('xingxu', 1);
 select ggdb.add_celebrity('Robert', 'Pattinson', 'RPat', '2013-05-30');
 select ggdb.add_celebrity_to_gossip('RPat', 1);
-INSERT INTO ggdb.bundle (name) VALUES
-	('relationship');
-INSERT INTO ggdb.tag (bundle_id, name) VALUES
-	(1, 'RPatKStew');
-INSERT INTO ggdb.tag (bundle_id, name) VALUES
-	(1, 'Brangelina');
+SELECT ggdb.create_bundle('relationship');
+SELECT ggdb.create_tag('relationship', 'RPatKStew');
+SELECT ggdb.create_tag('relationship', 'Brangelina');
 select ggdb.add_tag_to_gossip('RPatKStew', 1);
 select ggdb.add_tag_to_gossip('Brangelina', 1);
 select ggdb.add_celebrity('Kim', 'Kardashian', NULL, '1980-05-30');
