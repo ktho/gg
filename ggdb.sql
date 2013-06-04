@@ -1,5 +1,4 @@
-﻿/*
- * A database for gossip guy
+﻿ /* A database for gossip guy
  */
 
 create or replace language plpgsql;
@@ -399,7 +398,7 @@ RETURNS void AS $PROC$
 DECLARE
 BEGIN
 	if p_name not in (select ggdb.workflow.name from ggdb.workflow) then
-	
+
 		insert into ggdb.workflow (name, info) values (p_name, p_info);		
 		perform ggdb.add_node (p_name, 'str', 'start', 'S');
 		perform ggdb.add_node (p_name, 'end', 'end', 'E');
@@ -435,7 +434,7 @@ BEGIN
 
 		DELETE FROM ggdb.workflow
 			WHERE ggdb.workflow.id = workflowid;
-		
+
 	end if;
 
 END;
@@ -503,7 +502,7 @@ BEGIN
 			childrow.to_id:= row2.id;
 			childrow.to_shortname:= row2.shortname;
 			childrow.to_name:= row2.name;
-		
+
 			childrow.guardlabel:= linkrow.guardlabel;	
 			RETURN NEXT childrow;
 		END LOOP;
@@ -559,7 +558,7 @@ BEGIN
 	IF p_username NOT IN (select R.username from ggdb.reporter R where R.username = p_username) THEN
 		RAISE EXCEPTION 'gossip guy app:  reporter username >%< does not exist', p_username;
 	END IF;
-	
+
 	Update ggdb.reporter SET first_name=p_first, last_name=p_last, commission=p_comm
 	WHERE username=p_username;
 	/* Call Revision History Funciton Here
@@ -581,11 +580,11 @@ DECLARE
 	reporterrow ggdb.Reporter%ROWTYPE;
 BEGIN
 	select r.username into reporterid from ggdb.reporter r where r.username = p_username;
-	
+
 	IF p_username NOT IN (select R.username from ggdb.reporter R) THEN
 		RAISE EXCEPTION 'gossip guy app:  reporter  username >%< does not exist', p_username;
 	END IF;
-	
+
 	FOR row2 IN SELECT * from ggdb.reporter R where r.username = p_username
 	LOOP
 
@@ -618,11 +617,11 @@ DECLARE
 	reporterrow ggdb.Reporter%ROWTYPE;
 BEGIN
 	select r.id into reporterid from ggdb.reporter r where r.first_name = p_first;
-	
+
 	IF p_first NOT IN (select R.first_name from ggdb.reporter R) THEN
 		RAISE EXCEPTION 'gossip guy app:  reporter first name >%< does not exist', p_first;
 	END IF;
-	
+
 	FOR row2 IN SELECT * from ggdb.reporter R where r.first_name = p_first
 	LOOP
 
@@ -653,11 +652,11 @@ DECLARE
 	row2 RECORD;
 	reporterrow ggdb.Reporter%ROWTYPE;
 BEGIN
-	
+
 	IF p_last NOT IN (select R.last_name from ggdb.reporter R) THEN
 		RAISE EXCEPTION 'gossip guy app:  reporter last name >%< does not exist', p_last;
 	END IF;
-	
+
 	FOR row2 IN SELECT * from ggdb.reporter R where r.last_name = p_last
 	LOOP
 
@@ -688,11 +687,11 @@ DECLARE
 	row2 RECORD;
 	reporterrow ggdb.Reporter%ROWTYPE;
 BEGIN
-	
+
 	IF p_comm NOT IN (select R.commission from ggdb.reporter R) THEN
 		RAISE EXCEPTION 'gossip guy app:  reporter commission >%< does not exist', p_comm;
 	END IF;
-	
+
 	FOR row2 IN SELECT * from ggdb.reporter R where r.commission = p_comm
 	LOOP
 
@@ -709,6 +708,27 @@ BEGIN
 	/* Call Revision History Funciton Here
 	*/ 
  END;
+$PROC$ LANGUAGE plpgsql;
+
+/*
+ * DOCUMENT: Best match of reporter first name
+ * @Author: Xing
+ */
+
+CREATE OR REPLACE FUNCTION ggdb.bestmatch_reporter (
+		p_first varchar(64)
+)
+RETURNS TABLE (
+	id		integer,
+	username		varchar(64),
+	first_name		varchar(64), 
+	last_name 		varchar(64),
+	commission		money
+	) AS $PROC$
+BEGIN
+	RETURN QUERY select r.id, r.username, r.first_name, r.last_name,r.commission from ggdb.reporter r where to_tsvector (r.first_name) @@ to_tsquery(p_first);
+	RETURN;
+END;
 $PROC$ LANGUAGE plpgsql;
 
 /*
@@ -729,14 +749,14 @@ BEGIN
 	IF p_nick IS NULL THEN
 		p_nick := p_first || ' ' || p_last;
 	END IF;
-	
+
 	IF p_nick IN (select C.nick_name from ggdb.celebrity C where c.nick_name = p_nick) THEN
 		RAISE EXCEPTION 'gossip guy app:  celebrity >%< already exists', p_first || ' ' ||p_last;
 	END IF;
 
 	INSERT INTO ggdb.celebrity (first_name, last_name, nick_name, birthdate) VALUES
 		(p_first, p_last, p_nick, p_bday);
-	
+
 	/* Call Revision History Funciton Here
 	*/ 
 END;
@@ -759,7 +779,7 @@ BEGIN
 	IF p_nick NOT IN (select c.nick_name from ggdb.celebrity c where c.nick_name = p_nick) THEN
 		RAISE EXCEPTION 'gossip guy app:  celebrity nickname >%< does not exist', p_nick;
 	END IF;
-	
+
 	Update ggdb.celebrity SET first_name=p_first, last_name=p_last, birthdate=p_bday
 	WHERE nick_name=p_nick;
 	/* Call Revision History Funciton Here
@@ -779,11 +799,11 @@ DECLARE
 	row2 RECORD;
 	celebrityrow ggdb.celebrity%ROWTYPE;
 BEGIN
-	
+
 	IF p_nick NOT IN (select c.nick_name from ggdb.celebrity c) THEN
 		RAISE EXCEPTION 'gossip guy app:  reporter nick_name >%< does not exist', p_nick;
 	END IF;
-	
+
 	FOR row2 IN SELECT * from ggdb.celebrity c where c.nick_name = p_nick
 	LOOP
 
@@ -813,11 +833,11 @@ DECLARE
 	row2 RECORD;
 	celebrityrow ggdb.celebrity%ROWTYPE;
 BEGIN
-	
+
 	IF p_first NOT IN (select c.first_name from ggdb.celebrity c) THEN
 		RAISE EXCEPTION 'gossip guy app:  reporter first name >%< does not exist', p_first;
 	END IF;
-	
+
 	FOR row2 IN SELECT * from ggdb.celebrity c where c.first_name = p_first
 	LOOP
 
@@ -847,11 +867,11 @@ DECLARE
 	row2 RECORD;
 	celebrityrow ggdb.celebrity%ROWTYPE;
 BEGIN
-	
+
 	IF p_last NOT IN (select c.last_name from ggdb.celebrity c) THEN
 		RAISE EXCEPTION 'gossip guy app:  reporter last name >%< does not exist', p_last;
 	END IF;
-	
+
 	FOR row2 IN SELECT * from ggdb.celebrity c where c.last_name = p_last
 	LOOP
 
@@ -881,11 +901,11 @@ DECLARE
 	row2 RECORD;
 	celebrityrow ggdb.celebrity%ROWTYPE;
 BEGIN
-	
+
 	IF p_bday NOT IN (select c.birthdate from ggdb.celebrity c) THEN
 		RAISE EXCEPTION 'gossip guy app:  reporter brithdate >%< does not exist', p_bday;
 	END IF;
-	
+
 	FOR row2 IN SELECT * from ggdb.celebrity c where c.birthdate = p_bday
 	LOOP
 
@@ -924,7 +944,7 @@ DECLARE
 	reporterid INTEGER;
 	celebrityid INTEGER;
 	gossipid INTEGER;
-	
+
 BEGIN
 	select ggdb.workflow.id into workflowid from ggdb.workflow where ggdb.workflow.name = p_workflow;
 	IF NOT FOUND THEN
@@ -945,11 +965,11 @@ BEGIN
 	IF NOT FOUND THEN
 		RAISE EXCEPTION 'gossip guy app:  celebrity >%< not found', p_celebrity;
 	END IF;
-		
+
 	INSERT INTO ggdb.gossip (publish_date, is_active) VALUES (NULL, FALSE);
-	
+
 	select currval('ggdb.gossip_id_seq') into gossipid;
-	
+
 	INSERT INTO ggdb.version (gossip_id, title, body, creation_time, is_current) VALUES (
 		gossipid
 		, p_title
@@ -1001,11 +1021,11 @@ BEGIN
 	IF NOT FOUND THEN
 		RAISE EXCEPTION 'gossip guy app:  the gossip id >%< not found', p_gossipid;
 	END IF;	
-	
+
 	UPDATE ggdb.version v SET
 		is_current = FALSE
 		WHERE v.gossip_id = gossipid;
-		
+
 	INSERT INTO ggdb.version (gossip_id, title, body, creation_time, is_current) VALUES (
 		gossipid
 		, p_title
@@ -1018,11 +1038,11 @@ BEGIN
 		p_publishdate = clock_timestamp();
 	ELSE p_publishdate = NULL;
 	END IF;
-		
+
 	UPDATE ggdb.gossip g SET
 		publish_date = p_publishdate, is_active = p_isactive
 		WHERE g.id = gossipid;
-		
+
 END;
 $PROC$ LANGUAGE plpgsql;
 
@@ -1050,7 +1070,7 @@ BEGIN
 	DELETE FROM ggdb.celebrity_gossip cg WHERE cg.gossip_id = gossipid;
 	DELETE FROM ggdb.gossip_tag gt WHERE gt.gossip_id = gossipid;
 	DELETE FROM ggdb.gossip g WHERE g.id = gossipid;
-				
+
 END;
 $PROC$ LANGUAGE plpgsql;
 
@@ -1242,7 +1262,7 @@ BEGIN
 	IF NOT FOUND THEN
 		RAISE EXCEPTION 'gossip guy app:  the gossip id >%< not found', p_gossipid;
 	END IF;	
-	
+
 	RETURN QUERY (SELECT v.id, v.title, v.body, v.creation_time, v.is_current FROM ggdb.version v WHERE v.gossip_id = gossipid ORDER BY v.is_current desc, v.creation_time desc);
  END;
 $PROC$ LANGUAGE plpgsql;
@@ -1268,7 +1288,7 @@ BEGIN
 	IF NOT FOUND THEN
 		RAISE EXCEPTION 'gossip guy app:  the gossip id >%< not found', p_gossipid;
 	END IF;	
-	
+
 	RETURN QUERY (
 		select n.shortname, n.name, n.nodetype, gn.start_time
 			from ggdb.gossip g
@@ -1426,6 +1446,26 @@ BEGIN
 END;
 $PROC$ LANGUAGE plpgsql;
 
+/*
+ * DOCUMENT: Best match of gossip
+ * @Author: Xing
+ */
+
+CREATE OR REPLACE FUNCTION ggdb.bestmatch_gossip (
+		keyword varchar(64)
+)
+RETURNS TABLE (
+	title		varchar(128),
+	body		text,
+	creation_time	timestamp,
+	is_current		boolean
+	) AS $PROC$
+BEGIN
+	RETURN QUERY select v.title, v.body, v.creation_time, v.is_current
+		from ggdb.version v where to_tsvector (v.title) @@ to_tsquery(keyword);
+	RETURN;
+END;
+$PROC$ LANGUAGE plpgsql;
 
 
 /*
@@ -1451,7 +1491,7 @@ BEGIN
 		RAISE EXCEPTION 'gossip guy app:  bundle >%< not found', p_bname;
 		-- Possible to create a bundle if it does not exist... better option?
 	END IF;
-		
+
 	IF p_tname IN (select T.name from ggdb.tag T) THEN
 		RAISE EXCEPTION 'gossip guy app:  tag >%< already exists', p_tname;
 	END IF;
@@ -1477,7 +1517,7 @@ BEGIN
 	IF p_name NOT IN (select R.name from ggdb.tag R) THEN
 		RAISE EXCEPTION 'gossip guy app:  tag >%< does not exist', p_name;
 	END IF;
-	
+
 	SELECT B.id INTO new_bid FROM ggdb.bundle B WHERE B.name = p_newbname;
 	IF NOT FOUND THEN
 		RAISE EXCEPTION 'gossip guy app:  bundle >%< not found', p_bname;
@@ -1589,7 +1629,7 @@ BEGIN
 	IF NOT FOUND THEN
 		RAISE EXCEPTION 'gossip guy app:  tag >%< not in use', p_name;
 	END IF;
-	
+
 	RETURN QUERY (SELECT G.title, G.body FROM ggdb.gossip G WHERE G.id IN (
 		SELECT * FROM gid
 		));
@@ -1626,7 +1666,7 @@ BEGIN
 	IF NOT FOUND THEN
 		RAISE EXCEPTION 'gossip guy app:  tag >%< not in use', p_name;
 	END IF;
-	
+
 	RETURN QUERY (SELECT G.title, G.body FROM ggdb.gossip G WHERE G.id IN (
 		SELECT * FROM gid
 		));
@@ -1666,7 +1706,7 @@ RETURNS TABLE (
 ) AS $PROC$
 DECLARE
 BEGIN
-	
+
 	RETURN QUERY (select rh.time, rh.message from ggdb.revision_history rh where rh.time > p_timestamp);
 END;
 $PROC$ LANGUAGE plpgsql;
@@ -1720,29 +1760,31 @@ select ggdb.get_gossip_by_bundle ('relationship', 'f');
 
 /*
  *  Import data
- */
+ 
 COPY ggdb.celebrity (nick_name, first_name, last_name, birthdate) FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/celebNames.txt';
 
-COPY ggdb.reporter (username, first_name, last_name, commission) FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/reporterNames.txt';
+COPY ggdb.reporter (username, first_name, last_name, commission)FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/reporterNames.txt';
 
 COPY ggdb.gossip (publish_date) FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/gossipTable.txt';
 
 COPY ggdb.gossip_node (gossip_id, node_id, start_time) FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/gossipNode.txt';
 
 COPY ggdb.version (gossip_id, title, body) FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/versionGossip.txt';
-
-/*
-COPY ggdb.celebrity (nick_name, first_name, last_name, birthdate) FROM '/nfs/bronfs/uwfs/dw00/d41/ktyunho/gossipguy/celebNames.txt';
-
-COPY ggdb.reporter (username, first_name, last_name, commission) FROM '/nfs/bronfs/uwfs/dw00/d41/ktyunho/gossipguy/reporterNames.txt';
-
-COPY ggdb.gossip (publish_date) FROM '/nfs/bronfs/uwfs/dw00/d41/ktyunho/gossipguy/gossipTable.txt';
-
-COPY ggdb.gossip_node (gossip_id, node_id, start_time) FROM '/nfs/bronfs/uwfs/dw00/d41/ktyunho/gossipguy/gossipNode.txt';
-
-COPY ggdb.version (gossip_id, title, body) FROM '/nfs/bronfs/uwfs/dw00/d41/ktyunho/gossipguy/versionGossip.txt';
 */
 
+/* Best Match Functions*/
+ALTER TABLE ggdb.reporter ADD COLUMN reporter_fname_bucket_for_index tsvector;
+UPDATE ggdb.reporter SET reporter_fname_bucket_for_index =
+	to_tsvector('english', coalesce(first_name,'')); 
+
+
+ALTER TABLE ggdb.version ADD COLUMN gossip_title_bucket_for_index tsvector;
+UPDATE ggdb.version SET gossip_title_bucket_for_index =
+	to_tsvector('english', coalesce(title,''));
+
+--CREATE INDEX doc_index       ON txt.doc USING gin(text_bucket_for_index);
+CREATE INDEX reporter_fname_index ON ggdb.reporter USING gin(reporter_fname_bucket_for_index);
+CREATE INDEX gossip_title_index ON ggdb.version USING gin(gossip_title_bucket_for_index);
 
 /*
  * TESTING FUNCTIONS
@@ -1807,6 +1849,4 @@ select ggdb.find_loose_nodes('X');
 
 select * from ggdb.link;
 select * from ggdb.node;
-
-
 */
