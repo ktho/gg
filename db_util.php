@@ -7,6 +7,38 @@
 // include key database variables for connection string 
 include 'DBVars.php';
 
+	function runAndPrint($sql) 
+	{
+		global $gDB_conn_string;
+	
+		$return_value = 0; 
+		
+		// Try to make a connection 
+		$db = pg_connect($gDB_conn_string); 
+		if (!$db) {
+			$return_value = ("Error in connection: " . pg_last_error());
+			return $return_value;
+		}     
+		
+		// Create and run a query 
+		$result = pg_query($db, $sql);
+		if (!$result) {
+			$return_value = ("Error in SQL query: " . pg_last_error());
+			return $return_value;
+		}
+		else {
+			while ($row = pg_fetch_array($result)) {
+				//echo "(° ͜ʖ͡°)<br/>";
+				echo "<b>". $row[2] . "</b><br/>";
+				print_r($row[3]);
+				echo "<br/><br/>";
+			}
+		}
+		pg_free_result($result);       
+		pg_close($db);
+		return $return_value;
+	}
+
 
 	function runScalarDbQuery($sql) 
 	{
@@ -35,7 +67,6 @@ include 'DBVars.php';
 		}
 		pg_free_result($result);       
 		pg_close($db);
-		//echo "DEBUG: " . $sql;
 		return $return_value;
 	}
 
