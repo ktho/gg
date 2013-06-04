@@ -21,13 +21,13 @@ $gDB_name	= 'postgres';
 /*
  * The port on which the database is listening  
  */
-$gDB_port		= '4370';
+$gDB_port		= '13131';
 /*
  * The NetID user name 
  */
-$gDB_user	= 'katie';
+$gDB_user	= 'cte';
 
-$gDB_password = 'B00';
+$gDB_password = 'acad13bsbl';
 /*
  *  This is the connection string for connecting to the database -- 
  *  Note: In this case we do not use a password.
