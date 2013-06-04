@@ -1,4 +1,4 @@
-﻿/*
+/*
  * A database for gossip guy
  */
 
@@ -1723,26 +1723,13 @@ select ggdb.get_gossip_by_bundle ('relationship', 'f');
  */
 COPY ggdb.celebrity (nick_name, first_name, last_name, birthdate) FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/celebNames.txt';
 
-COPY ggdb.reporter (username, first_name, last_name, commission) FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/reporterNames.txt';
+COPY ggdb.reporter (username, first_name, last_name, commission)FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/reporterNames.txt';
 
 COPY ggdb.gossip (publish_date) FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/gossipTable.txt';
 
 COPY ggdb.gossip_node (gossip_id, node_id, start_time) FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/gossipNode.txt';
 
 COPY ggdb.version (gossip_id, title, body) FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/versionGossip.txt';
-
-/*
-COPY ggdb.celebrity (nick_name, first_name, last_name, birthdate) FROM '/nfs/bronfs/uwfs/dw00/d41/ktyunho/gossipguy/celebNames.txt';
-
-COPY ggdb.reporter (username, first_name, last_name, commission) FROM '/nfs/bronfs/uwfs/dw00/d41/ktyunho/gossipguy/reporterNames.txt';
-
-COPY ggdb.gossip (publish_date) FROM '/nfs/bronfs/uwfs/dw00/d41/ktyunho/gossipguy/gossipTable.txt';
-
-COPY ggdb.gossip_node (gossip_id, node_id, start_time) FROM '/nfs/bronfs/uwfs/dw00/d41/ktyunho/gossipguy/gossipNode.txt';
-
-COPY ggdb.version (gossip_id, title, body) FROM '/nfs/bronfs/uwfs/dw00/d41/ktyunho/gossipguy/versionGossip.txt';
-*/
-
 
 /*
  * TESTING FUNCTIONS
