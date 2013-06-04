@@ -1,5 +1,5 @@
-/*
- * A database for gossip guy
+
+ /* A database for gossip guy
  */
 
 create or replace language plpgsql;
@@ -709,6 +709,27 @@ BEGIN
 	/* Call Revision History Funciton Here
 	*/ 
  END;
+$PROC$ LANGUAGE plpgsql;
+
+/*
+ * DOCUMENT: Best match of reporter first name
+ * @Author: Xing
+ */
+
+CREATE OR REPLACE FUNCTION ggdb.bestmatch_reporter (
+		p_first varchar(64)
+)
+RETURNS TABLE (
+	id		integer,
+	username		varchar(64),
+	first_name		varchar(64), 
+	last_name 		varchar(64),
+	commission		money
+	) AS $PROC$
+BEGIN
+	RETURN QUERY select r.id, r.username, r.first_name, r.last_name,r.commission from ggdb.reporter r where to_tsvector (r.first_name) @@ to_tsquery(p_first);
+	RETURN;
+END;
 $PROC$ LANGUAGE plpgsql;
 
 /*
@@ -1426,6 +1447,26 @@ BEGIN
 END;
 $PROC$ LANGUAGE plpgsql;
 
+/*
+ * DOCUMENT: Best match of gossip
+ * @Author: Xing
+ */
+
+CREATE OR REPLACE FUNCTION ggdb.bestmatch_gossip (
+		keyword varchar(64)
+)
+RETURNS TABLE (
+	title		varchar(128),
+	body		text,
+	creation_time	timestamp,
+	is_current		boolean
+	) AS $PROC$
+BEGIN
+	RETURN QUERY select v.title, v.body, v.creation_time, v.is_current
+		from ggdb.version v where to_tsvector (v.title) @@ to_tsquery(keyword);
+	RETURN;
+END;
+$PROC$ LANGUAGE plpgsql;
 
 
 /*
@@ -1720,7 +1761,7 @@ select ggdb.get_gossip_by_bundle ('relationship', 'f');
 
 /*
  *  Import data
- */
+ 
 COPY ggdb.celebrity (nick_name, first_name, last_name, birthdate) FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/celebNames.txt';
 
 COPY ggdb.reporter (username, first_name, last_name, commission)FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/reporterNames.txt';
@@ -1730,6 +1771,21 @@ COPY ggdb.gossip (publish_date) FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/gos
 COPY ggdb.gossip_node (gossip_id, node_id, start_time) FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/gossipNode.txt';
 
 COPY ggdb.version (gossip_id, title, body) FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/versionGossip.txt';
+*/
+
+/* Best Match Functions*/
+ALTER TABLE ggdb.reporter ADD COLUMN reporter_fname_bucket_for_index tsvector;
+UPDATE ggdb.reporter SET reporter_fname_bucket_for_index =
+	to_tsvector('english', coalesce(first_name,'')); 
+
+
+ALTER TABLE ggdb.version ADD COLUMN gossip_title_bucket_for_index tsvector;
+UPDATE ggdb.version SET gossip_title_bucket_for_index =
+	to_tsvector('english', coalesce(title,''));
+
+--CREATE INDEX doc_index       ON txt.doc USING gin(text_bucket_for_index);
+CREATE INDEX reporter_fname_index ON ggdb.reporter USING gin(reporter_fname_bucket_for_index);
+CREATE INDEX gossip_title_index ON ggdb.version USING gin(gossip_title_bucket_for_index);
 
 /*
  * TESTING FUNCTIONS
@@ -1794,6 +1850,5 @@ select ggdb.find_loose_nodes('X');
 
 select * from ggdb.link;
 select * from ggdb.node;
-
-
 */
+
