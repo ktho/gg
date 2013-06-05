@@ -168,16 +168,16 @@ CREATE TABLE ggdb.revision_history (
 /* Best Match Functions*/
 ALTER TABLE ggdb.reporter ADD COLUMN reporter_fname_bucket_for_index tsvector;
 UPDATE ggdb.reporter SET reporter_fname_bucket_for_index =
-	to_tsvector('english', coalesce(first_name,'')); 
+	to_tsvector('english', first_name); 
 
 
-ALTER TABLE ggdb.version ADD COLUMN gossip_title_bucket_for_index tsvector;
-UPDATE ggdb.version SET gossip_title_bucket_for_index =
-	to_tsvector('english', coalesce(title,''));
+ALTER TABLE ggdb.version ADD COLUMN gossip_body_bucket_for_index tsvector;
+UPDATE ggdb.version SET gossip_body_bucket_for_index =
+	to_tsvector('english', body);
 
 --CREATE INDEX doc_index       ON txt.doc USING gin(text_bucket_for_index);
 CREATE INDEX reporter_fname_index ON ggdb.reporter USING gin(reporter_fname_bucket_for_index);
-CREATE INDEX gossip_title_index ON ggdb.version USING gin(gossip_title_bucket_for_index);
+CREATE INDEX gossip_body_index ON ggdb.version USING gin(gossip_body_bucket_for_index);
 
 
 /*
@@ -1477,8 +1477,7 @@ RETURNS TABLE (
 	is_current		boolean
 	) AS $PROC$
 BEGIN
-	RETURN QUERY select v.title, v.body, v.creation_time, v.is_current
-		from ggdb.version v where to_tsvector (v.title) @@ to_tsquery(keyword);
+	RETURN QUERY select v.title, v.body, v.creation_time, v.is_current from ggdb.version v where to_tsvector(body) @@ to_tsquery(keyword);
 	RETURN;
 END;
 $PROC$ LANGUAGE plpgsql;
@@ -1754,6 +1753,18 @@ COPY ggdb.gossip_node (gossip_id, node_id, start_time) FROM '/nfs/bronfs/uwfs/dw
 COPY ggdb.version (gossip_id, title, body) FROM '/nfs/bronfs/uwfs/dw00/d41/ktyunho/gossipguy/versionGossip.txt';
 */
 
+
+ /*  Import data to Xing's server
+COPY ggdb.celebrity (nick_name, first_name, last_name, birthdate) FROM '/nfs/bronfs/uwfs/hw00/d74/xingxu/gossipguy/celebNames.txt';
+
+COPY ggdb.reporter (username, first_name, last_name, commission)FROM '/nfs/bronfs/uwfs/hw00/d74/xingxu/gossipguy/reporterNames.txt';
+
+COPY ggdb.gossip (publish_date) FROM '/nfs/bronfs/uwfs/hw00/d74/xingxu/gossipguy/gossipTable.txt';
+
+COPY ggdb.gossip_node (gossip_id, node_id, start_time) FROM '/nfs/bronfs/uwfs/hw00/d74/xingxu/gossipguy/gossipNode.txt';
+
+COPY ggdb.version (gossip_id, title, body) FROM '/nfs/bronfs/uwfs/hw00/d74/xingxu/gossipguy/versionGossip.txt';
+*/
 
 /*
  ********************************************************************************
