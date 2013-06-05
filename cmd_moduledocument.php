@@ -42,6 +42,9 @@ function dispatchDocumentCmd($cmd, $cmd_list)
 		elseif ($arg1 == "get") {
 			$status = reporter_get($cmd_list);
 		}
+		elseif ($arg1 == "match") {
+			$status = reporter_match($cmd_list);
+		}
 		else {
 			$status = cCmdStatus_NOT_FOUND; 
 		}
@@ -100,6 +103,9 @@ function dispatchDocumentCmd($cmd, $cmd_list)
 		}
 		else if ($arg1 == "changestatus") {
 			$status = gossip_changestatus($cmd_list);
+		}
+		else if ($arg1 == "match") {
+			$status = gossip_match($cmd_list);
 		}
 		else {
 			$status = cCmdStatus_NOT_FOUND; 
@@ -196,6 +202,27 @@ function reporter_get($cmd_list) {
 	else {
 			$status = cCmdStatus_ERROR; 
 		}
+
+	$nl = "\n". $result . "\n"; 
+	$gResult = $nl . print_r($cmd_list,true);
+	return cCmdStatus_OK; 
+}
+
+/*
+ * Best-match reporter
+ * Author: Xing 6/4/13 10:12pm
+ */
+function reporter_match($cmd_list) {
+	global $gResult;
+
+	$f = getValue("-f",$cmd_list); 
+
+	if ($f == NULL) {
+		return cCmdStatus_ERROR; 
+	}
+	
+		$sql = sprintf("select * from ggdb.bestmatch_reporter ('%s');", $f);
+		$result = runSetDbQuery($sql,"basicPrintLine");
 
 	$nl = "\n". $result . "\n"; 
 	$gResult = $nl . print_r($cmd_list,true);
@@ -537,6 +564,27 @@ function gossip_changestatus($cmd_list) {
 	$result = runScalarDbQuery($sql);
 
 	$nl = "\n"; 
+	$gResult = $nl . print_r($cmd_list,true);
+	return cCmdStatus_OK; 
+}
+
+/*
+ * Best-match reporter
+ * Author: Xing 6/4/13 10:45pm
+ */
+function gossip_match($cmd_list) {
+	global $gResult;
+
+	$f = getValue("-k",$cmd_list); 
+
+	if ($f == NULL) {
+		return cCmdStatus_ERROR; 
+	}
+	
+		$sql = sprintf("select * from ggdb.bestmatch_gossip ('%s');", $f);
+		$result = runSetDbQuery($sql,"basicPrintLine");
+
+	$nl = "\n". $result . "\n"; 
 	$gResult = $nl . print_r($cmd_list,true);
 	return cCmdStatus_OK; 
 }
