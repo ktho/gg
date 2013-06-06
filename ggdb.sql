@@ -1493,7 +1493,7 @@ RETURNS TABLE (
 	is_current		boolean
 	) AS $PROC$
 BEGIN
-	RETURN QUERY select v.title, v.body, v.creation_time, v.is_current from ggdb.version v where to_tsvector(body) @@ to_tsquery(keyword);
+	RETURN QUERY select v.title, v.body, v.creation_time, v.is_current from ggdb.version v where v.is_current = 't' AND to_tsvector(body) @@ to_tsquery(keyword);
 	RETURN;
 END;
 $PROC$ LANGUAGE plpgsql;
