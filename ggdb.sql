@@ -214,6 +214,7 @@ BEGIN
 		, (SELECT ggdb.node.id FROM ggdb.node WHERE ggdb.node.workflow_id = workflowid AND ggdb.node.shortname = p_nodeshortname)
 		, p_guardlabel
 		);
+
 END;
 $PROC$ LANGUAGE plpgsql;
 
@@ -544,6 +545,8 @@ CREATE OR REPLACE FUNCTION ggdb.add_reporter (
 		, p_comm money
 )
 RETURNS void AS $PROC$
+DECLARE
+	reporterid integer;
 BEGIN
 
 	IF p_username IN (select R.username from ggdb.reporter R where R.username = p_username) THEN
@@ -552,8 +555,11 @@ BEGIN
 
 	INSERT INTO ggdb.reporter (username, first_name, last_name, commission) VALUES
 		(p_username, p_first, p_last, p_comm);
-	/* Call Revision History Funciton Here
-	*/ 
+
+	SELECT currval('ggdb.reporter_id_seq') into reporterid;
+
+	PERFORM ggdb.update_revision_history ('Reporter ID ' || reporterid || ' added');
+	
 END;
 
 $PROC$ LANGUAGE plpgsql;
@@ -569,6 +575,8 @@ CREATE OR REPLACE FUNCTION ggdb.update_reporter (
 		, p_comm money
 )
 RETURNS void AS $PROC$
+DECLARE
+	reporterid integer;
 BEGIN
 
 	IF p_username NOT IN (select R.username from ggdb.reporter R where R.username = p_username) THEN
@@ -577,8 +585,11 @@ BEGIN
 
 	Update ggdb.reporter SET first_name=p_first, last_name=p_last, commission=p_comm
 	WHERE username=p_username;
-	/* Call Revision History Funciton Here
-	*/ 
+
+	SELECT r.id into reporterid from ggdb.reporter r WHERE username=p_username;
+
+	PERFORM ggdb.update_revision_history ('Reporter ID ' || reporterid || ' updated');
+
  END;
 $PROC$ LANGUAGE plpgsql;
 
@@ -651,8 +662,7 @@ BEGIN
 
 	END LOOP;
 	RETURN;
-	/* Call Revision History Funciton Here
-	*/ 
+
  END;
 $PROC$ LANGUAGE plpgsql;
 
@@ -686,8 +696,6 @@ BEGIN
 
 	END LOOP;
 	RETURN;
-	/* Call Revision History Funciton Here
-	*/ 
  END;
 $PROC$ LANGUAGE plpgsql;
 
@@ -721,8 +729,6 @@ BEGIN
 
 	END LOOP;
 	RETURN;
-	/* Call Revision History Funciton Here
-	*/ 
  END;
 $PROC$ LANGUAGE plpgsql;
 
@@ -758,7 +764,8 @@ CREATE OR REPLACE FUNCTION ggdb.add_celebrity (
 		, p_bday date
 )
 RETURNS void AS $PROC$
-
+DECLARE
+	celebrityid integer;
 BEGIN
 
 	--DOCUMENT: Create Nick_Name for table celebrity if the user doesn't specify the nickname
@@ -773,8 +780,10 @@ BEGIN
 	INSERT INTO ggdb.celebrity (first_name, last_name, nick_name, birthdate) VALUES
 		(p_first, p_last, p_nick, p_bday);
 
-	/* Call Revision History Funciton Here
-	*/ 
+	SELECT currval('ggdb.celebrity_id_seq') into celebrityid;
+
+	PERFORM ggdb.update_revision_history ('Celebrity ID ' || celebrityid || ' added');
+
 END;
 $PROC$ LANGUAGE plpgsql;
 
@@ -789,7 +798,8 @@ CREATE OR REPLACE FUNCTION ggdb.update_celebrity (
 		, p_bday date
 )
 RETURNS void AS $PROC$
-
+DECLARE
+	celebrityid integer;
 BEGIN
 
 	IF p_nick NOT IN (select c.nick_name from ggdb.celebrity c where c.nick_name = p_nick) THEN
@@ -798,8 +808,11 @@ BEGIN
 
 	Update ggdb.celebrity SET first_name=p_first, last_name=p_last, birthdate=p_bday
 	WHERE nick_name=p_nick;
-	/* Call Revision History Funciton Here
-	*/ 
+
+	SELECT c.id into celebrityid from ggdb.celebrity c WHERE nick_name=p_nick;
+
+	PERFORM ggdb.update_revision_history ('Celebrity ID ' || celebrityid || ' updated');
+	
 END;
 $PROC$ LANGUAGE plpgsql;
 
@@ -832,8 +845,7 @@ BEGIN
 
 	END LOOP;
 	RETURN;
-	/* Call Revision History Funciton Here
-	*/ 
+
  END;
 $PROC$ LANGUAGE plpgsql;
 
@@ -866,8 +878,7 @@ BEGIN
 
 	END LOOP;
 	RETURN;
-	/* Call Revision History Funciton Here
-	*/ 
+
  END;
 $PROC$ LANGUAGE plpgsql;
 
@@ -900,8 +911,7 @@ BEGIN
 
 	END LOOP;
 	RETURN;
-	/* Call Revision History Funciton Here
-	*/ 
+
  END;
 $PROC$ LANGUAGE plpgsql;
 
@@ -935,8 +945,7 @@ BEGIN
 
 	END LOOP;
 	RETURN;
-	/* Call Revision History Funciton Here
-	*/ 
+
  END;
 $PROC$ LANGUAGE plpgsql;
 
@@ -1012,6 +1021,9 @@ BEGIN
 		gossipid
 		, celebrityid
 		);
+
+	PERFORM ggdb.update_revision_history ('Gossip ID ' || gossipid || ' added');
+	
 END;
 $PROC$ LANGUAGE plpgsql;
 
@@ -1030,6 +1042,7 @@ DECLARE
 	workflowid INTEGER;
 	nodeid INTEGER;
 	gossipid INTEGER;
+	versionid INTEGER;
 	p_publishdate timestamp;
 BEGIN
 
@@ -1049,7 +1062,8 @@ BEGIN
 		, clock_timestamp()
 		, TRUE
 	);
-
+	SELECT currval('ggdb.version_id_seq') into versionid;
+	
 	IF (p_isactive) THEN
 		p_publishdate = clock_timestamp();
 	ELSE p_publishdate = NULL;
@@ -1058,6 +1072,8 @@ BEGIN
 	UPDATE ggdb.gossip g SET
 		publish_date = p_publishdate, is_active = p_isactive
 		WHERE g.id = gossipid;
+
+	PERFORM ggdb.update_revision_history ('Gossip ID ' || gossipid || ' updated; ' || 'Version ID ' || versionid || ' added');
 
 END;
 $PROC$ LANGUAGE plpgsql;
@@ -1087,6 +1103,7 @@ BEGIN
 	DELETE FROM ggdb.gossip_tag gt WHERE gt.gossip_id = gossipid;
 	DELETE FROM ggdb.gossip g WHERE g.id = gossipid;
 
+	PERFORM ggdb.update_revision_history ('Gossip ID ' || gossipid || ' deleted and all associated links');
 END;
 $PROC$ LANGUAGE plpgsql;
 
@@ -1363,6 +1380,8 @@ BEGIN
 			WHERE g.id = gossipid;
 	END IF;
 
+	PERFORM ggdb.update_revision_history ('Gossip ID ' || gossipid || ' status updated to ' || (select n.name from ggdb.node n where n.id = newnodeid));
+
 END;
 $PROC$ LANGUAGE plpgsql;
 
@@ -1370,7 +1389,6 @@ $PROC$ LANGUAGE plpgsql;
  * DOCUMENT:  Add Reporter To Gossip
  * @Author: Katie
  */
- 
 CREATE OR REPLACE FUNCTION ggdb.add_reporter_to_gossip (
 		  p_reporter varchar(64)
 		, p_gossipid INTEGER
@@ -1403,7 +1421,6 @@ $PROC$ LANGUAGE plpgsql;
  * DOCUMENT:  Add Celebrity To Gossip
  * @Author: Katie
  */
- 
 CREATE OR REPLACE FUNCTION ggdb.add_celebrity_to_gossip (
 		  p_celebritynickname VARCHAR (64)
 		, p_gossipid INTEGER
@@ -1466,7 +1483,6 @@ $PROC$ LANGUAGE plpgsql;
  * DOCUMENT: Best match of gossip
  * @Author: Xing
  */
-
 CREATE OR REPLACE FUNCTION ggdb.bestmatch_gossip (
 		keyword varchar(64)
 )
@@ -1702,7 +1718,7 @@ CREATE OR REPLACE FUNCTION ggdb.update_revision_history (
 )
 RETURNS void AS $PROC$
 BEGIN
-	INSERT INTO ggdb.revision_history (message) VALUES
+	INSERT INTO ggdb.revision_history (time, message) VALUES
 		(clock_timestamp(), p_message);
 END;
 $PROC$ LANGUAGE plpgsql;
@@ -1725,46 +1741,6 @@ BEGIN
 END;
 $PROC$ LANGUAGE plpgsql;
 
-
-/*
- *  Import data
-COPY ggdb.celebrity (nick_name, first_name, last_name, birthdate) FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/celebNames.txt';
-
-COPY ggdb.reporter (username, first_name, last_name, commission)FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/reporterNames.txt';
-
-COPY ggdb.gossip (publish_date) FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/gossipTable.txt';
-
-COPY ggdb.gossip_node (gossip_id, node_id, start_time) FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/gossipNode.txt';
-
-COPY ggdb.version (gossip_id, title, body) FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/versionGossip.txt';
-*/
-
-/*
- *  Import data
-COPY ggdb.celebrity (nick_name, first_name, last_name, birthdate) FROM '/nfs/bronfs/uwfs/dw00/d41/ktyunho/gossipguy/celebNames.txt';
-
-COPY ggdb.reporter (username, first_name, last_name, commission)FROM '/nfs/bronfs/uwfs/dw00/d41/ktyunho/gossipguy/reporterNames.txt';
-
-COPY ggdb.gossip (publish_date) FROM '/nfs/bronfs/uwfs/dw00/d41/ktyunho/gossipguy/gossipTable.txt';
-
-COPY ggdb.gossip_node (gossip_id, node_id, start_time) FROM '/nfs/bronfs/uwfs/dw00/d41/ktyunho/gossipguy/gossipNode.txt';
-
-COPY ggdb.version (gossip_id, title, body) FROM '/nfs/bronfs/uwfs/dw00/d41/ktyunho/gossipguy/versionGossip.txt';
-*/
-
-
- /*  Import data to Xing's server
-COPY ggdb.celebrity (nick_name, first_name, last_name, birthdate) FROM '/nfs/bronfs/uwfs/hw00/d74/xingxu/gossipguy/celebNames.txt';
-
-COPY ggdb.reporter (username, first_name, last_name, commission)FROM '/nfs/bronfs/uwfs/hw00/d74/xingxu/gossipguy/reporterNames.txt';
-
-COPY ggdb.gossip (publish_date) FROM '/nfs/bronfs/uwfs/hw00/d74/xingxu/gossipguy/gossipTable.txt';
-
-COPY ggdb.gossip_node (gossip_id, node_id, start_time) FROM '/nfs/bronfs/uwfs/hw00/d74/xingxu/gossipguy/gossipNode.txt';
-
-COPY ggdb.version (gossip_id, title, body) FROM '/nfs/bronfs/uwfs/hw00/d74/xingxu/gossipguy/versionGossip.txt';
-*/
-
 /*
  ********************************************************************************
     INSERT DEFAULT DATA:   
@@ -1778,10 +1754,12 @@ select ggdb.link_to_finish ('def', 'pub', '');
 select ggdb.link_between('def', 'dra', 'pub', '');
 select ggdb.add_reporter('katie', 'Katie', 'Ho', '$10000.00');
 select ggdb.add_reporter('xingxu', 'Xing', 'Xu', '$50000.00');
+select ggdb.update_reporter('katie', 'kt', 'ho', '$10000000.00');
 select ggdb.add_celebrity('Kirsten', 'Stewart', 'kstew', '2012-03-30');
 select ggdb.create_gossip('def', 'dra', 'katie', 'kstew', 'Kstew is in another scandal!', 'kstew tweets about whether she should get plastic surgery');
 select ggdb.add_reporter_to_gossip('xingxu', 1);
 select ggdb.add_celebrity('Robert', 'Pattinson', 'RPat', '2013-05-30');
+select ggdb.update_celebrity('Robbie', 'Pattinson', 'RPat', '2013-05-30');
 select ggdb.add_celebrity_to_gossip('RPat', 1);
 SELECT ggdb.create_bundle('relationship');
 SELECT ggdb.create_tag('relationship', 'RPatKStew');
@@ -1804,8 +1782,61 @@ select ggdb.add_reporter('JTim', 'Justin', 'Timberlake', '$50000.00');
 
 select ggdb.update_gossip('1', 'Adam Levine hates his country', 'Adam Levine declared his hate for America on The Voice last night.', FALSE);
 select ggdb.update_gossip('1', 'Testing', 'testing update.', 'f');
+select ggdb.change_gossip_status('1', 'pub', 'true');
+
+select * from ggdb.revision_history;
 
 
+/*
+ ********************************************************************************
+    UTILITY:  IMPORT DATA FROM FILES:   
+ ********************************************************************************
+ */
+
+/*
+ *  Import data
+COPY ggdb.celebrity (nick_name, first_name, last_name, birthdate) FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/celebNames.txt';
+
+COPY ggdb.reporter (username, first_name, last_name, commission)FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/reporterNames.txt';
+
+COPY ggdb.gossip (publish_date) FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/gossipTable.txt';
+
+COPY ggdb.gossip_node (gossip_id, node_id, start_time) FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/gossipNode.txt';
+
+COPY ggdb.version (gossip_id, title, body) FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/versionGossip.txt';
+*/
+
+
+COPY ggdb.celebrity (nick_name, first_name, last_name, birthdate) FROM '/nfs/bronfs/uwfs/dw00/d41/ktyunho/gossipguy/celebNames.txt';
+
+COPY ggdb.reporter (username, first_name, last_name, commission)FROM '/nfs/bronfs/uwfs/dw00/d41/ktyunho/gossipguy/reporterNames.txt';
+
+COPY ggdb.gossip (publish_date) FROM '/nfs/bronfs/uwfs/dw00/d41/ktyunho/gossipguy/gossipTable.txt';
+
+COPY ggdb.gossip_node (gossip_id, node_id, start_time) FROM '/nfs/bronfs/uwfs/dw00/d41/ktyunho/gossipguy/gossipNode.txt';
+
+COPY ggdb.version (gossip_id, title, body) FROM '/nfs/bronfs/uwfs/dw00/d41/ktyunho/gossipguy/versionGossip.txt';
+
+
+
+ /*  Import data to Xing's server
+COPY ggdb.celebrity (nick_name, first_name, last_name, birthdate) FROM '/nfs/bronfs/uwfs/hw00/d74/xingxu/gossipguy/celebNames.txt';
+
+COPY ggdb.reporter (username, first_name, last_name, commission)FROM '/nfs/bronfs/uwfs/hw00/d74/xingxu/gossipguy/reporterNames.txt';
+
+COPY ggdb.gossip (publish_date) FROM '/nfs/bronfs/uwfs/hw00/d74/xingxu/gossipguy/gossipTable.txt';
+
+COPY ggdb.gossip_node (gossip_id, node_id, start_time) FROM '/nfs/bronfs/uwfs/hw00/d74/xingxu/gossipguy/gossipNode.txt';
+
+COPY ggdb.version (gossip_id, title, body) FROM '/nfs/bronfs/uwfs/hw00/d74/xingxu/gossipguy/versionGossip.txt';
+*/
+
+
+
+/*
+ * TESTING FUNCTIONS
+ *
+ */
 select ggdb.get_gossip_status ('1');
 
 select ggdb.get_gossip_by_reporter ('katie', 'f');
@@ -1819,11 +1850,6 @@ select ggdb.get_gossip_by_tag ('Brangelina', 'f');
 select ggdb.get_gossip_by_bundle ('relationship', 'f');
 
 
-
-/*
- * TESTING FUNCTIONS
- *
- */
 
 /*
 select ggdb.change_gossip_status('1', 'pub', 'true');
