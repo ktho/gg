@@ -1732,7 +1732,7 @@ CREATE OR REPLACE FUNCTION ggdb.get_revision_history (
 	p_timestamp	timestamp
 )
 RETURNS TABLE (
-	thetime  		timestamp,
+	thetime  	timestamp,
 	message		text 
 ) AS $PROC$
 DECLARE
