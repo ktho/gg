@@ -4,343 +4,204 @@
  */
 
 
-// //	foreach $cmd_list as $t {
-// //
-// //
-// // }
 
-// /*
-//  * This function dispatches a workflow command and its parameters to the corresponding function 
-//  */
-//function dispatchTagCmd($cmd, $cmd_list) 
-// {
-// 	global $gResult;
-// 	$status = cCmdStatus_NOT_FOUND;
+ /* This function dispatches a tagging & bundle commands and its parameters to the corresponding function 
+  */
+function dispatchTagCmd($cmd, $cmd_list) 
+{
+	global $gResult;
+	$status = cCmdStatus_NOT_FOUND;
 	
-// 	$cmd = $cmd_list[0];
-// 	if ($cmd != "workflow") {
-// 		$status = cCmdStatus_NOT_FOUND; 
-// 		return $status;
-// 	}
-
-// 	$arg1 = "";
-// 	if (count($cmd_list) > 1) {
-// 		$arg1 = $cmd_list[1];
-// 	}
+	$cmd = $cmd_list[0];
+	if (($cmd != "tag") && ($cmd != "bundle")) {
+		$status = cCmdStatus_NOT_FOUND; 
+		return $status;
+	}
 	
-// 	if ($arg1 == "create") {
-// 		$status = wf_create($cmd_list);
-// 	}
-// 	elseif ($arg1 == "delete") {
-// 		$status = wf_delete($cmd_list);
-// 	}
-// 	elseif ($arg1 == "list") {
-// 		$status = wf_list($cmd_list);
-// 	}
-// 	else {
-// 		$status = cCmdStatus_NOT_FOUND; 
-// 	}
+	if ($cmd == "tag") { 
+		$arg1 = "";
+		if (count($cmd_list) > 1) {
+		$arg1 = $cmd_list[1];
+		}
 	
-// 	return $status;
-// }
+		if ($arg1 == "create") {
+			$status = create_tag($cmd_list);
+		}
+		elseif ($arg1 == "update") {
+		$status = update_tag($cmd_list);
+		}
+		elseif ($arg1 == "remove") {
+			$status = delete_tag($cmd_list);
+		}
+		else {
+			$status = cCmdStatus_NOT_FOUND; 
+		}
+	return $status;
+	}
 
+	if ($cmd == "bundle") { 
 
-// /*
-//  * This function dispatches a node command and its parameters to the corresponding function 
-//  */
-// function dispatchNodeCmd($cmd, $cmd_list) 
-// {
-// 	global $gResult;
-// 	$status = cCmdStatus_NOT_FOUND;
+		$arg1 = "";
+		if (count($cmd_list) > 1) {
+		$arg1 = $cmd_list[1];
+		}
 	
-// 	$cmd = $cmd_list[0];
-// 	if ($cmd != "node") {
-// 		$status = cCmdStatus_NOT_FOUND; 
-// 		return $status;
-// 	}
-
-// 	$arg1 = "";
-// 	if (count($cmd_list) > 1) {
-// 		$arg1 = $cmd_list[1];
-// 	}
-	
-// 	if ($arg1 == "add") {
-// 		$status = node_add($cmd_list);
-// 	}
-// 	elseif ($arg1 == "list") {
-// 		$status = node_list($cmd_list);
-// 	}
-// 	elseif ($arg1 == "loose") {
-// 		$status = node_loose($cmd_list);
-// 	}
-// 	else {
-// 		$status = cCmdStatus_NOT_FOUND; 
-// 	}
-	
-// 	return $status;
-// }
-
-// /*
-//  * This function dispatches a link command and its parameters to the corresponding function 
-//  */
-// function dispatchLinkCmd($cmd, $cmd_list) 
-// {
-// 	global $gResult;
-// 	$status = cCmdStatus_NOT_FOUND;
-	
-// 	$cmd = $cmd_list[0];
-// 	if ($cmd != "link") {
-// 		$status = cCmdStatus_NOT_FOUND; 
-// 		return $status;
-// 	}
-
-// 	$arg1 = "";
-// 	if (count($cmd_list) > 1) {
-// 		$arg1 = $cmd_list[1];
-// 	}
-	
-// 	if ($arg1 == "start") {
-// 		$status = link_start($cmd_list);
-// 	}
-// 	elseif ($arg1 == "finish") {
-// 		$status = link_finish($cmd_list);
-// 	}
-// 	elseif ($arg1 == "children") {
-// 		$status = link_children($cmd_list);
-// 	}
-// 	elseif ((getValue("-wf",$cmd_list) != NULL) 
-// 			|| (getValue("-from",$cmd_list) != NULL)
-// 			|| (getValue("-to",$cmd_list) != NULL)){
-// 		$status = link_between($cmd_list);
-// 	}
-// 	else {
-// 		$status = cCmdStatus_NOT_FOUND; 
-// 	}
-	
-// 	return $status;
-// }
-
-
-// /*
-//  * Creates a workflow
-//  */
-// function wf_create($cmd_list) {
-// 	global $gResult;
-
-// 	$n = getValue("-n",$cmd_list);
-// 	$i = getValue("-i",$cmd_list); 
-
-// 	if (($n == NULL)) {
-// 		return cCmdStatus_ERROR; 
-// 	}
-
-// 	$sql = sprintf("SELECT ggdb.create_workflow ('%s', '%s')", $n, $i);
-
-// 	$result = runScalarDbQuery($sql);
-
-// 	$t = "\n"; 
-// 	$gResult = $t . print_r($cmd_list,true);
-// 	return cCmdStatus_OK; 
-// }
-
-// /*
-//  * Deletes a workflow
-//  */
-// function wf_delete($cmd_list) {
-// 	global $gResult;
-
-// 	$n = getValue("-n",$cmd_list);
-// 	if ($n == NULL) {
-// 		return cCmdStatus_ERROR; 
-// 	}
-
+		if ($arg1 == "create") {
+			$status = create_bundle($cmd_list);
+		}
+		elseif ($arg1 == "update") {
+		$status = update_bundle($cmd_list);
+		}
+		elseif ($arg1 == "remove") {
+		$status = delete_bundle($cmd_list);
+		}
+		else {
+			$status = cCmdStatus_NOT_FOUND; 
+		}
+	return $status;
+	}
+}
 
-// 	$sql = sprintf("SELECT ggdb.drop_workflow ('%s');", $n);
+/*
+ * Create Tag
+ * Author: Cory
+ */
+function create_tag($cmd_list) {
+	global $gResult;
 
-// 	$result = runScalarDbQuery($sql, "basicPrintLine");
+	$b = getValue("-b",$cmd_list); 
+	$n = getValue("-n",$cmd_list);  
 
-// 	$t = $result . "\n"; 
-// 	$gResult = $t . print_r($cmd_list,true);
-// 	return cCmdStatus_OK; 
-// }
+	if (($b == NULL)|| ($n == NULL)) {
+		return cCmdStatus_ERROR; 
+	}
 
 
-// /*
-//  * List all workflows
-//  */
-// function wf_list($cmd_list) {
-// 	global $gResult;
+	$sql = sprintf("select ggdb.create_tag('%s', '%s');", $b, $n);
 
-// 	$sql = "SELECT ggdb.get_workflows();";
+	$result = runScalarDbQuery($sql);
 
-// 	$result = runSetDbQuery($sql,"basicPrintLine");
+	$t = "\n"; 
+	$gResult = $t . print_r($cmd_list,true);
+	return cCmdStatus_OK; 
+}
 
-// 	$t = "\n" . $result . "\n"; 
-// 	$gResult = $t . print_r($cmd_list,true);
-// 	return cCmdStatus_OK; 
-// }
+/*
+ * Update Tag
+ * Author: Cory
+ */
+function update_tag($cmd_list) {
+	global $gResult;
 
-// /*
-//  * Adds node
-//  */
-// function node_add($cmd_list) {
-// 	global $gResult;
+	$n = getValue("-n",$cmd_list); 
+	$nb = getValue("-nb",$cmd_list); 
+	$nt = getValue("-nt",$cmd_list); 
 
-// 	$wf = getValue("-wf",$cmd_list);
-// 	$sn = getValue("-sn",$cmd_list); 
-// 	$t = getValue("-t",$cmd_list); 
-// 	$n = getValue("-n",$cmd_list); 
+	if (($n == NULL) || ($nb == NULL)|| ($nt == NULL)) {
+		return cCmdStatus_ERROR; 
+	}
 
-// 	if (($wf == NULL) || ($sn == NULL)|| ($t == NULL)|| ($n == NULL)) {
-// 		return cCmdStatus_ERROR; 
-// 	}
 
+	$sql = sprintf("select ggdb.update_tag('%s', '%s', '%s');", $n, $nb, $nt);
 
-// 	$sql = sprintf("select ggdb.add_node ('%s', '%s', '%s', '%s');", $wf, $sn, $n, $t);
+	$result = runScalarDbQuery($sql);
 
-// 	$result = runScalarDbQuery($sql);
+	$t = "\n"; 
+	$gResult = $t . print_r($cmd_list,true);
+	return cCmdStatus_OK; 
+}
 
-// 	$t = "\n"; 
-// 	$gResult = $t . print_r($cmd_list,true);
-// 	return cCmdStatus_OK; 
-// }
+/*
+ * Delete Tag
+ * Author: Cory
+ */
+function delete_tag($cmd_list) {
+	global $gResult;
 
-// /*
-//  * Lists nodes in workflow
-//  */
-// function node_list($cmd_list) {
-// 	global $gResult;
+	$n = getValue("-n",$cmd_list); 
 
-// 	$wf = getValue("-wf",$cmd_list);
-// 	if (($wf == NULL)) {
-// 		return cCmdStatus_ERROR; 
-// 	}
+	if (($n == NULL)) {
+		return cCmdStatus_ERROR; 
+	}
 
 
-// 	$sql = sprintf("select ggdb.get_nodes ('%s');", $wf);
+	$sql = sprintf("select ggdb.delete_tag('%s');", $n);
 
+	$result = runScalarDbQuery($sql);
 
-// 	$result = runSetDbQuery($sql,"basicPrintLine");
+	$t = "\n"; 
+	$gResult = $t . print_r($cmd_list,true);
+	return cCmdStatus_OK; 
+}
 
-// 	$t = "\n" . $result . "\n"; 
-// 	$gResult = $t . print_r($cmd_list,true);
-// 	return cCmdStatus_OK; 
-// }
+/*
+ * Create Bundle
+ * Author: Cory
+ */
+function create_bundle($cmd_list) {
+	global $gResult;
 
+	$n = getValue("-n",$cmd_list); 
 
-// /*
-//  * Lists nodes that have no links.
-//  */
-// function node_loose($cmd_list) {
-// 	global $gResult;
+	if ($n == NULL) {
+		return cCmdStatus_ERROR; 
+	}
 
-// 	$wf = getValue("-wf",$cmd_list);
-// 	if (($wf == NULL)) {
-// 		return cCmdStatus_ERROR; 
-// 	}
 
+	$sql = sprintf("select ggdb.create_bundle('%s');", $n);
 
-// 	$sql = sprintf("select ggdb.find_loose_nodes ('%s');", $wf);
+	$result = runScalarDbQuery($sql);
 
+	$t = "\n"; 
+	$gResult = $t . print_r($cmd_list,true);
+	return cCmdStatus_OK; 
+}
 
-// 	$result = runSetDbQuery($sql,"basicPrintLine");
+/*
+ * Update Bundle
+ * Author: Cory
+ */
+function update_bundle($cmd_list) {
+	global $gResult;
 
-// 	$t = "\n" . $result . "\n"; 
-// 	$gResult = $t . print_r($cmd_list,true);
-// 	return cCmdStatus_OK; 
-// }
+	$n = getValue("-n",$cmd_list); 
+	$nb = getValue("-nb",$cmd_list); 
 
-// /*
-//  * Links node to start node for that workflow.     
-//  */
-// function link_start($cmd_list) {
-// 	global $gResult;
+	if (($n == NULL) || ($nb == NULL)) {
+		return cCmdStatus_ERROR; 
+	}
 
-// 	$wf = getValue("-wf",$cmd_list);
-// 	$to = getValue("-to",$cmd_list); 
-// 	$g = getValue("-g",$cmd_list); 
 
-// 	if (($wf == NULL) || ($to == NULL)) {
-// 		return cCmdStatus_ERROR; 
-// 	}
+	$sql = sprintf("select ggdb.update_bundle('%s', '%s');", $n, $nb);
 
+	$result = runScalarDbQuery($sql);
 
-// 	$sql = sprintf("select ggdb.link_from_start ('%s', '%s', '%s');", $wf, $to, $g);
+	$t = "\n"; 
+	$gResult = $t . print_r($cmd_list,true);
+	return cCmdStatus_OK; 
+}
 
-// 	$result = runScalarDbQuery($sql);
+/*
+ * Delete Bundle
+ * Author: Cory
+ */
+function delete_bundle($cmd_list) {
+	global $gResult;
 
-// 	$t = "\n"; 
-// 	$gResult = $t . print_r($cmd_list,true);
-// 	return cCmdStatus_OK; 
-// }
+	$n = getValue("-n",$cmd_list); 
 
-// /*
-//  * Links node to end node for that workflow.       
-//  */
-// function link_finish($cmd_list) {
-// 	global $gResult;
+	if ($n == NULL) {
+		return cCmdStatus_ERROR; 
+	}
 
-// 	$wf = getValue("-wf",$cmd_list);
-// 	$from = getValue("-from",$cmd_list); 
-// 	$g = getValue("-g",$cmd_list); 
 
-// 	if (($wf == NULL) || ($from == NULL)) {
-// 		return cCmdStatus_ERROR; 
-// 	}
+	$sql = sprintf("select ggdb.delete_bundle('%s');", $n);
 
-// 	$sql = sprintf("select ggdb.link_to_finish ('%s', '%s', '%s');", $wf, $from, $g);
+	$result = runScalarDbQuery($sql);
 
-// 	$result = runScalarDbQuery($sql);
+	$t = "\n"; 
+	$gResult = $t . print_r($cmd_list,true);
+	return cCmdStatus_OK; 
+}
 
-// 	$t = "\n"; 
-// 	$gResult = $t . print_r($cmd_list,true);
-// 	return cCmdStatus_OK; 
-// }
-
-// /*
-//  * Links two nodes together.   
-//  */
-// function link_between($cmd_list) {
-// 	global $gResult;
-
-// 	$wf = getValue("-wf",$cmd_list);
-// 	$from = getValue("-from",$cmd_list); 
-// 	$to = getValue("-to",$cmd_list); 
-// 	$g = getValue("-g",$cmd_list); 
-
-// 	if (($wf == NULL) || ($from == NULL)|| ($to == NULL)) {
-// 		return cCmdStatus_ERROR; 
-// 	}
-
-// 	$sql = sprintf("select ggdb.link_between ('%s', '%s', '%s', '%s');", $wf, $from, $to, $g);
-
-// 	$result = runScalarDbQuery($sql);
-
-// 	$t = "\n"; 
-// 	$gResult = $t . print_r($cmd_list,true);
-// 	return cCmdStatus_OK; 
-// }
-
-// /*
-//  * Lists children of a node with the guard label.    
-//  */
-// function link_children($cmd_list) {
-// 	global $gResult;
-
-// 	$wf = getValue("-wf",$cmd_list);
-// 	$sn = getValue("-sn",$cmd_list);
-// 	if (($wf == NULL)||($sn == NULL)) {
-// 		return cCmdStatus_ERROR; 
-// 	}
-
-
-// 	$sql = sprintf("select ggdb.get_children ('%s', '%s');", $wf, $sn);
-
-
-// 	$result = runSetDbQuery($sql,"basicPrintLine");
-
-// 	$t = "\n" . $result . "\n"; 
-// 	$gResult = $t . print_r($cmd_list,true);
-// 	return cCmdStatus_OK; 
-// }
 ?>

@@ -71,18 +71,14 @@
 		<textarea rows="10" cols="98" name="body"><?php echo htmlspecialchars($body);?></textarea>
 		<span class="error"><?php echo $bodyErr;?></span>
 		<br/>
-		<input type="submit" value="POST"/>
+		<input type="submit" name="gossip" value="POST"/>
 	</form>
 	<?php
-		
 		include 'cmd_dispatch.php';
 		
 		if ($_SERVER[REQUEST_METHOD] == "POST" && $reset) {
 			$sqlInsert = "SELECT ggdb.create_gossip ('def', 'str', '" . $_POST[username] . "', '" . $_POST[nickname] . "', '" . $_POST[title] . "', '" . $_POST[body] . "');";
-			$sqlShow = "SELECT * FROM ggdb.version WHERE creation_time > '2013-06-03 13:16:07.60319' ORDER BY creation_time DESC LIMIT 10;";
-	?>
-	<h3>Recent Gossip</h3>
-	<?php	
+			$sqlShow = "SELECT * FROM ggdb.version WHERE creation_time > '2013-06-03 13:16:07.60319' ORDER BY creation_time DESC LIMIT 10;";	
 			runScalarDBQuery($sqlInsert);
 			runAndPrint($sqlShow);
 			$reset = false;

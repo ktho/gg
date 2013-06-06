@@ -1539,8 +1539,8 @@ BEGIN
 		-- Possible to create a bundle if it does not exist... better option?
 	END IF;	
 
-	UPDATE ggdb.tag T SET T.name = p_newname, T.bundle_id = new_bid
-		WHERE T.name = p_name;
+	UPDATE ggdb.tag SET name = p_newname, bundle_id = new_bid
+		WHERE name = p_name;
 END;
 $PROC$ LANGUAGE plpgsql;
 
@@ -1556,12 +1556,11 @@ RETURNS void AS $PROC$
 DECLARE
 	id		INTEGER;
 BEGIN
-	SELECT T.id INTO id FROM ggdb.tag T WHERE T.name = p_name;
-	IF NOT FOUND THEN
+	IF p_name NOT IN (select T.name from ggdb.tag T) THEN
 		RAISE EXCEPTION 'gossip guy app:  tag >%< does not exist', p_name;
 	END IF;
 
-	DELETE FROM ggdb.tag T WHERE T.id = id;
+	DELETE FROM ggdb.tag T WHERE T.name = p_name;
 END;
 $PROC$ LANGUAGE plpgsql;
 
