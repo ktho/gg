@@ -1804,12 +1804,24 @@ COPY ggdb.gossip (publish_date) FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/gos
 COPY ggdb.gossip_node (gossip_id, node_id, start_time) FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/gossipNode.txt';
 
 COPY ggdb.version (gossip_id, title, body) FROM '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/versionGossip.txt';
+
+
+--export
+COPY ggdb.celebrity (nick_name, first_name, last_name, birthdate) TO '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/EXPORT_celebNames.txt';
+
+COPY ggdb.reporter (username, first_name, last_name, commission) TO '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/EXPORT_reporterNames.txt';
+
+COPY ggdb.version (gossip_id, title, body, is_current) TO '/nfs/bronfs/uwfs/dw00/d12/cte13/gg.git/EXPORT_versionGossip.txt';
+
+
+
 */
 
-
+/*
+--import
 COPY ggdb.celebrity (nick_name, first_name, last_name, birthdate) FROM '/nfs/bronfs/uwfs/dw00/d41/ktyunho/gossipguy/celebNames.txt';
 
-COPY ggdb.reporter (username, first_name, last_name, commission)FROM '/nfs/bronfs/uwfs/dw00/d41/ktyunho/gossipguy/reporterNames.txt';
+COPY ggdb.reporter (username, first_name, last_name, commission) FROM '/nfs/bronfs/uwfs/dw00/d41/ktyunho/gossipguy/reporterNames.txt';
 
 COPY ggdb.gossip (publish_date) FROM '/nfs/bronfs/uwfs/dw00/d41/ktyunho/gossipguy/gossipTable.txt';
 
@@ -1817,6 +1829,13 @@ COPY ggdb.gossip_node (gossip_id, node_id, start_time) FROM '/nfs/bronfs/uwfs/dw
 
 COPY ggdb.version (gossip_id, title, body) FROM '/nfs/bronfs/uwfs/dw00/d41/ktyunho/gossipguy/versionGossip.txt';
 
+--export
+COPY ggdb.celebrity (nick_name, first_name, last_name, birthdate) TO '/nfs/bronfs/uwfs/dw00/d41/ktyunho/gossipguy/EXPORT_celebNames.txt';
+
+COPY ggdb.reporter (username, first_name, last_name, commission) TO '/nfs/bronfs/uwfs/dw00/d41/ktyunho/gossipguy/EXPORT_reporterNames.txt';
+
+COPY ggdb.version (gossip_id, title, body, is_current) TO '/nfs/bronfs/uwfs/dw00/d41/ktyunho/gossipguy/EXPORT_versionGossip.txt';
+*/
 
 
  /*  Import data to Xing's server
@@ -1829,6 +1848,15 @@ COPY ggdb.gossip (publish_date) FROM '/nfs/bronfs/uwfs/hw00/d74/xingxu/gossipguy
 COPY ggdb.gossip_node (gossip_id, node_id, start_time) FROM '/nfs/bronfs/uwfs/hw00/d74/xingxu/gossipguy/gossipNode.txt';
 
 COPY ggdb.version (gossip_id, title, body) FROM '/nfs/bronfs/uwfs/hw00/d74/xingxu/gossipguy/versionGossip.txt';
+
+
+--export
+COPY ggdb.celebrity (nick_name, first_name, last_name, birthdate) TO '/nfs/bronfs/uwfs/hw00/d74/xingxu/gossipguy/EXPORT_celebNames.txt';
+
+COPY ggdb.reporter (username, first_name, last_name, commission) TO '/nfs/bronfs/uwfs/hw00/d74/xingxu/gossipguy/EXPORT_reporterNames.txt';
+
+COPY ggdb.version (gossip_id, title, body, is_current) TO '/nfs/bronfs/uwfs/hw00/d74/xingxu/gossipguy/EXPORT_versionGossip.txt';
+
 */
 
 
