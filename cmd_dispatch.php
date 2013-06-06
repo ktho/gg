@@ -19,12 +19,22 @@ function dispatchCommand($cmd_list)
 	// The first element is the command name 
 	$cmd = $cmd_list[0]; 
 	
+<<<<<<< HEAD
 	// Try to match the command against the tag module
 	// @ Author: Xing || 05/23/13 6:25pm
 	// $status = dispatchUtilityCmd($cmd, $cmd_list); 
 	// if ($status != cCmdStatus_NOT_FOUND) {
 	// 	return $status; 
 	// }
+=======
+	// // Try to match the command against the tag module
+	// // @ Author: Xing || 05/23/13 6:20pm
+	// $status = dispatchTagCmd($cmd, $cmd_list); 
+	// if ($status != cCmdStatus_NOT_FOUND) {
+	// 	return $status; 
+	// }
+
+>>>>>>> f9657c82afcc5323dfe65f9820765fdc77fc4b32
 	
 	// Try to match the command against the utility commands
 	$status = dispatchWorkflowCmd($cmd, $cmd_list); 
@@ -47,10 +57,18 @@ function dispatchCommand($cmd_list)
 		return $status; 
 	}
 
+<<<<<<< HEAD
 	$status = dispatchTagCmd($cmd, $cmd_list); 
 	if ($status != cCmdStatus_NOT_FOUND) {
 		return $status; 
 	}
+=======
+	//@ Author: Xing || 05/23/13 6:25pm
+	$status = dispatchUtilityCmd($cmd, $cmd_list); 
+	if ($status != cCmdStatus_NOT_FOUND) {
+	 	return $status; 
+	 }
+>>>>>>> f9657c82afcc5323dfe65f9820765fdc77fc4b32
 
 	// You could sent the command to other dispatchers if desired ... 
 	// $status = dispatchXxxxCmd($cmd, $cmd_list); 
