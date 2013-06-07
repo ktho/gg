@@ -165,19 +165,33 @@ CREATE TABLE ggdb.revision_history (
 );
 
 
+
+
 /* Best Match Functions*/
 ALTER TABLE ggdb.reporter ADD COLUMN reporter_fname_bucket_for_index tsvector;
 UPDATE ggdb.reporter SET reporter_fname_bucket_for_index =
-	to_tsvector('english',coalesce(first_name,'')); 
+	to_tsvector('english', first_name); 
 
 
 ALTER TABLE ggdb.version ADD COLUMN gossip_body_bucket_for_index tsvector;
 UPDATE ggdb.version SET gossip_body_bucket_for_index =
-	to_tsvector('english', coalesce(body,''));
+	to_tsvector('english', body);
 
 --CREATE INDEX doc_index       ON txt.doc USING gin(text_bucket_for_index);
 CREATE INDEX reporter_fname_index ON ggdb.reporter USING gin(reporter_fname_bucket_for_index);
 CREATE INDEX gossip_body_index ON ggdb.version USING gin(gossip_body_bucket_for_index);
+
+CREATE INDEX workflow_name_idx ON ggdb.workflow USING hash (name);
+CREATE INDEX node_shortname_idx ON ggdb.node USING hash (shortname);
+CREATE INDEX celebrity_nickname_idx ON ggdb.celebrity USING hash (nick_name);
+CREATE INDEX reporter_username_idx ON ggdb.reporter USING hash (username);
+CREATE INDEX bundle_name_idx ON ggdb.bundle USING hash (name);
+CREATE INDEX tag_name_idx ON ggdb.tag USING hash (name);
+
+/*
+CREATE INDEX worklog_did_idx ON act2.work_log USING btree (did);
+CREATE INDEX worklog_timelogged_idx ON act2.work_log USING btree (timelogged);
+*/
 
 
 /*
@@ -748,10 +762,8 @@ RETURNS TABLE (
 	commission		money
 	) AS $PROC$
 BEGIN
-	RETURN QUERY 
-	select r.id, r.username, r.first_name, r.last_name,r.commission 
-	from ggdb.reporter r,  to_tsquery(p_first) as query
-	where to_tsvector (r.first_name) @@ query;
+	RETURN QUERY select r.id, r.username, r.first_name, r.last_name,r.commission from ggdb.reporter r where to_tsvector (r.first_name) @@ to_tsquery(p_first);
+	RETURN;
 END;
 $PROC$ LANGUAGE plpgsql;
 
@@ -1495,10 +1507,8 @@ RETURNS TABLE (
 	is_current		boolean
 	) AS $PROC$
 BEGIN
-	RETURN QUERY select v.title, v.body, v.creation_time, v.is_current 
-	select r.id, r.username, r.first_name, r.last_name,r.commission 
-	from ggdb.version v,  to_tsquery(keyword) as query
-	where to_tsvector (v.body) @@ query;
+	RETURN QUERY select v.title, v.body, v.creation_time, v.is_current from ggdb.version v where to_tsvector(body) @@ to_tsquery(keyword);
+	RETURN;
 END;
 $PROC$ LANGUAGE plpgsql;
 
@@ -1762,8 +1772,6 @@ select ggdb.add_reporter('xingxu', 'Xing', 'Xu', '$50000.00');
 select ggdb.update_reporter('katie', 'kt', 'ho', '$10000000.00');
 select ggdb.add_celebrity('Kirsten', 'Stewart', 'kstew', '2012-03-30');
 select ggdb.create_gossip('def', 'dra', 'katie', 'kstew', 'Kstew is in another scandal!', 'kstew tweets about whether she should get plastic surgery');
-select ggdb.create_gossip('def', 'dra', 'katie', 'kstew', 'Kstew is in another scandal!', 'Reporter saw kstew get hit by Robert');
-
 select ggdb.add_reporter_to_gossip('xingxu', 1);
 select ggdb.add_celebrity('Robert', 'Pattinson', 'RPat', '2013-05-30');
 select ggdb.update_celebrity('Robbie', 'Pattinson', 'RPat', '2013-05-30');
@@ -1788,7 +1796,6 @@ select ggdb.add_reporter('JBieber', 'Justin', 'Bieber', '$50000.00');
 select ggdb.add_reporter('JTim', 'Justin', 'Timberlake', '$50000.00');
 
 select ggdb.update_gossip('1', 'Adam Levine hates his country', 'Adam Levine declared his hate for America on The Voice last night.', FALSE);
-select
 select ggdb.update_gossip('1', 'Testing', 'testing update.', 'f');
 select ggdb.change_gossip_status('1', 'pub', 'true');
 
@@ -1846,7 +1853,7 @@ COPY ggdb.version (gossip_id, title, body, is_current) TO '/nfs/bronfs/uwfs/dw00
 */
 
 
- /*  Import data to Xing's server */
+ /*  Import data to Xing's server
 COPY ggdb.celebrity (nick_name, first_name, last_name, birthdate) FROM '/nfs/bronfs/uwfs/hw00/d74/xingxu/gossipguy/celebNames.txt';
 
 COPY ggdb.reporter (username, first_name, last_name, commission)FROM '/nfs/bronfs/uwfs/hw00/d74/xingxu/gossipguy/reporterNames.txt';
@@ -1857,7 +1864,7 @@ COPY ggdb.gossip_node (gossip_id, node_id, start_time) FROM '/nfs/bronfs/uwfs/hw
 
 COPY ggdb.version (gossip_id, title, body) FROM '/nfs/bronfs/uwfs/hw00/d74/xingxu/gossipguy/versionGossip.txt';
 
-/*
+
 --export
 COPY ggdb.celebrity (nick_name, first_name, last_name, birthdate) TO '/nfs/bronfs/uwfs/hw00/d74/xingxu/gossipguy/EXPORT_celebNames.txt';
 
