@@ -15,19 +15,37 @@
 <br>
 
 <p>
-Friends, Romans, Countrymen:  <br>
+Friends:  <br>
 Find the worst gossip here.<br>
 Sincerely, <br>
 Gossip Guy <br>
 </p>
 
-<h2>Link to report:</h2>
+<h2>Link to Full Report:</h2>
 	<p>
 		<ul>
   		<a href="ProjectReport.pdf">Report.pdf</a>	
 		</ul>
 	</p>
 
+<h2>Link to Report Diagrams:</h2>
+	<p>
+		<ul>
+  		<a href="gg-conceptual.png">gg-ConceptualModel.png</a>	
+		</ul>	
+		<ul>
+  		<a href="erdiagram-v8.png">gg-LogicalModel.png</a>	
+		</ul>
+		<ul>
+  		<a href="gg-physicaldiagram-v1.png">gg-PhysicalModel.png</a>	
+		</ul>
+		<ul>
+  		<a href="datadictionary.pdf">gg-DataDictionary.pdf</a>	
+		</ul>
+		<ul>
+  		<a href="FunctionList.pdf">gg-FunctionList.pdf</a>	
+		</ul>
+	</p>
 
 <h2>Link to terminal command shell:</h2>
 	<p>
@@ -42,42 +60,6 @@ Gossip Guy <br>
   		<a href="gossip.php">Gossip.php</a>	
 		</ul>
 	</p>
-
-
-<h2>Instructions For Testing:</h2>
-	<p>In order to test the functions in the terminal, you can use the following commands and paste it into the terminal.  First, you can list the current workflows and create a new workflow "A2."  </p>
-		<p class ="co">
-		workflow list<br>
-		workflow create -n "A2" -i "workflow for assignment two"
-		</p>
-
-	<p>In order to add nodes to the new workflow, you can use the following commands.  </p>
-		<p class = "co">
-		node add -wf "A2" -sn "dad" -t "F" -n "the dad node"<br>
-		node add -wf "A2" -sn "bob" -t "A" -n "the bob node"<br>
-		node add -wf "A2" -sn "sis" -t "A" -n "the sis node"<br>
-		node add -wf "A2" -sn "mom" -t "J" -n "the mom node"
-		</p>
-	
-	<p>You can link between nodes using the following commands. </p>
-		<p class = "co">
-		link start -wf "A2" -to "dad"<br>
-		link -wf "A2" -from "dad" -to "bob" -g "bad parenting"<br>
-		link -wf "A2" -from "dad" -to "sis" -g "bad parenting"<br>
-		link -wf "A2" -from "bob" -to "mom" -g "favorite son"<br>
-		link -wf "A2" -from "sis" -to "mom" -g "female bonding"<br>
-		link finish -wf "A2" -from "mom" -g "the glue"
-		</p>
-
-	<p>You can find information about the workflow, nodes, and links through the following commands.  For example, the "link children" command shows the children nodes of the given node.  Then, you can delete the workflow that you just created with the workflow delete command.</p>
-		<p class = "co">
-		link children -wf "A2" -sn "dad"
-		<br>node loose -wf "A2"
-		<br>node list -wf "A2"
-		<br>workflow delete -n "A2"
-		</p>
-	</p>
-</p>
 
 
 <h2>Links to code:</h2>
