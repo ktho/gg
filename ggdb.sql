@@ -1756,6 +1756,7 @@ select ggdb.add_node ('def', 'pub', 'publish', 'A');
 select ggdb.link_from_start ('def', 'dra', '');
 select ggdb.link_to_finish ('def', 'pub', '');
 select ggdb.link_between('def', 'dra', 'pub', '');
+select ggdb.add_reporter('gossipguy', 'gossip', 'guy', '$0.00');
 select ggdb.add_reporter('katie', 'Katie', 'Ho', '$10000.00');
 select ggdb.add_reporter('xingxu', 'Xing', 'Xu', '$50000.00');
 select ggdb.update_reporter('katie', 'kt', 'ho', '$10000000.00');
